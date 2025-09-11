@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docebo API Searcher</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // This is the configuration for Tailwind CSS, telling it to use the 'class' strategy for dark mode.
+      // This allows us to toggle dark mode manually with JavaScript.
+      tailwind.config = {
+        darkMode: 'class'
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -75,61 +82,97 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 transition-colors duration-300">
+
+    <!-- Sticky Header -->
+    <div id="sticky-header" class="hidden fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md z-50 transition-transform duration-300 ease-in-out transform -translate-y-full">
+        <div class="container mx-auto p-3 flex items-center justify-between gap-8">
+             <!-- Sticky Search -->
+            <div class="flex-grow max-w-lg relative">
+                <input type="search" id="stickySearchInput" class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Filter by URL or description...">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+            <!-- Sticky View Toggle -->
+            <div id="sticky-view-toggle-container" class="flex items-center justify-start gap-2">
+                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 hidden sm:block">View:</h3>
+                <div id="sticky-view-toggle-switch" class="relative flex items-center rounded-lg bg-gray-200 dark:bg-gray-700 p-1 w-40">
+                    <div id="sticky-view-toggle-indicator" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-white dark:bg-gray-600 rounded-md shadow transition-transform duration-300 ease-in-out"></div>
+                    <button id="stickySimpleViewBtn" class="relative w-1/2 py-1 text-sm font-semibold text-blue-600 z-10 transition-colors">Simple</button>
+                    <button id="stickyDetailedViewBtn" class="relative w-1/2 py-1 text-sm font-semibold text-gray-600 dark:text-gray-400 z-10 transition-colors">Detailed</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container mx-auto p-4 md:p-8">
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-            <div class="flex items-center gap-4 mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5zM10 13.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5z"/>
-                </svg>
-                <h1 class="text-5xl font-bold text-gray-900 font-figtree">Docebo API Searcher</h1>
+        <div class="bg-white rounded-2xl shadow-lg p-8 dark:bg-gray-800">
+             <div class="flex justify-between items-start">
+                <div class="flex items-center gap-4 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5zM10 13.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5z"/>
+                    </svg>
+                    <h1 class="text-5xl font-bold text-gray-900 font-figtree dark:text-white">Docebo API Searcher</h1>
+                </div>
+                 <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                    <!-- Lightbulb OFF Icon (Yellow, shows in light mode) -->
+                    <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zM14 20h-4v1h4v-1zm0-2h-4v1h4v-1z"></path></svg>
+                    <!-- Lightbulb ON Icon (Gray, shows in dark mode) -->
+                    <svg id="theme-toggle-light-icon" class="hidden w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zM14 20H10v1h4v-1zm0-2H10v1h4v-1z"></path></svg>
+                </button>
             </div>
-            <p class="text-gray-600 mb-6 pl-14">Enter the base URL for your Docebo instance to discover available API services and their endpoints.</p>
+            <p class="text-gray-600 mb-6 pl-14 dark:text-gray-400">Enter the base URL for your Docebo instance to discover available API services and their endpoints.</p>
 
             <div class="flex flex-col sm:flex-row gap-4 mb-8">
-                <input type="text" id="baseUrlInput" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="e.g., mj-michael-james.docebosaas.com" value="mj-michael-james.docebosaas.com">
+                <input type="text" id="baseUrlInput" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="e.g., mj-michael-james.docebosaas.com" value="mj-michael-james.docebosaas.com">
                 <button id="fetchButton" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105">
                     Fetch API Endpoints
                 </button>
             </div>
             
             <div id="view-toggle-container" class="hidden flex items-center justify-start gap-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">View Mode:</h3>
-                <div id="view-toggle-switch" class="relative flex items-center rounded-lg bg-gray-200 p-1 w-40">
-                    <div id="view-toggle-indicator" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-white rounded-md shadow transition-transform duration-300 ease-in-out"></div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">View Mode:</h3>
+                <div id="view-toggle-switch" class="relative flex items-center rounded-lg bg-gray-200 dark:bg-gray-700 p-1 w-40">
+                    <div id="view-toggle-indicator" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-white dark:bg-gray-600 rounded-md shadow transition-transform duration-300 ease-in-out"></div>
                     <button id="simpleViewBtn" class="relative w-1/2 py-1 text-sm font-semibold text-blue-600 z-10 transition-colors">Simple</button>
-                    <button id="detailedViewBtn" class="relative w-1/2 py-1 text-sm font-semibold text-gray-600 z-10 transition-colors">Detailed</button>
+                    <button id="detailedViewBtn" class="relative w-1/2 py-1 text-sm font-semibold text-gray-600 dark:text-gray-400 z-10 transition-colors">Detailed</button>
                 </div>
             </div>
 
-            <div id="detailed-view-warning" class="hidden text-sm text-amber-800 bg-amber-100 p-3 rounded-lg -mt-2 mb-4">
-                <strong>Heads Up:</strong> Detailed view is an experimental feature and may be slower to render, especially with an unfiltered list of endpoints. For the best experience, try filtering your search in 'Simple' mode first, then switch to 'Detailed' view.
+            <div id="detailed-view-warning" class="hidden relative text-sm text-amber-800 bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300 p-4 pl-5 rounded-lg -mt-2 mb-4">
+                 <strong>Heads Up:</strong>&nbsp;Detailed view is an experimental feature and may less responsive, especially with an unfiltered list of endpoints. For the best experience, try searching first in 'Simple' mode, then switching to 'Detailed' view.
+                 <button id="close-warning-btn" class="absolute top-2 right-2 p-1 rounded-md hover:bg-amber-200 dark:hover:bg-amber-800/50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 </button>
+            </div>
+            
+            <div id="search-container" class="hidden my-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Search for APIs</h3>
+                <div class="relative">
+                    <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter by URL or description...">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <button id="clearSearchButton" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
             </div>
 
             <div id="nav-container" class="hidden">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Jump to...</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Jump to...</h3>
                     <div class="flex gap-2">
                        <button id="sortAZButton" title="Sort services alphabetically" class="text-xs font-semibold py-1 px-3 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">Sort A-Z</button>
                        <button id="resetSortButton" title="Reset to original sort order" class="text-xs font-semibold py-1 px-3 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">Reset Sort</button>
                     </div>
                </div>
-                <div id="nav-links" class="flex flex-wrap gap-2 pb-4 border-b border-gray-200 mb-6"></div>
-            </div>
-
-            <div id="search-container" class="hidden relative my-6">
-                <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Filter by URL or description...">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <button id="clearSearchButton" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <div id="nav-links" class="flex flex-wrap gap-2 pb-4 border-b border-gray-200 dark:border-gray-700 mb-6"></div>
             </div>
             
             <div id="expand-collapse-container" class="hidden flex justify-between items-center gap-2 mb-4">
-                <div id="total-api-count" class="text-gray-600 text-sm font-semibold"></div>
+                <div id="total-api-count" class="text-gray-600 dark:text-gray-400 text-sm font-semibold"></div>
                 <div class="flex items-center gap-2">
                     <button id="resetFiltersButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Reset Filters</button>
                     <button id="expandAllButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">Expand All</button>
@@ -139,7 +182,7 @@
 
             <div id="results" class="space-y-6"></div>
             
-            <div id="errorBox" class="hidden mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+            <div id="errorBox" class="hidden mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg dark:bg-red-900/40 dark:text-red-300 dark:border-red-500" role="alert">
                 <strong class="font-bold">Error:</strong>
                 <span class="block sm:inline" id="errorMessage"></span>
             </div>
@@ -153,6 +196,38 @@
     </button>
 
     <script>
+        // DARK MODE TOGGLE SCRIPT
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        const setTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'light');
+            }
+        };
+
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme('dark');
+        } else {
+            setTheme('light');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            setTheme(isDarkMode ? 'light' : 'dark');
+        });
+        // --- END OF DARK MODE SCRIPT ---
+
+
         const fetchButton = document.getElementById('fetchButton');
         const resultsDiv = document.getElementById('results');
         const baseUrlInput = document.getElementById('baseUrlInput');
@@ -171,10 +246,18 @@
         const simpleViewBtn = document.getElementById('simpleViewBtn');
         const detailedViewBtn = document.getElementById('detailedViewBtn');
         const detailedViewWarning = document.getElementById('detailed-view-warning');
+        const closeWarningBtn = document.getElementById('close-warning-btn');
         const resetFiltersButton = document.getElementById('resetFiltersButton');
         const sortAZButton = document.getElementById('sortAZButton');
         const resetSortButton = document.getElementById('resetSortButton');
         const totalApiCountEl = document.getElementById('total-api-count');
+
+        // Sticky Header elements
+        const stickyHeader = document.getElementById('sticky-header');
+        const stickySearchInput = document.getElementById('stickySearchInput');
+        const stickySimpleViewBtn = document.getElementById('stickySimpleViewBtn');
+        const stickyDetailedViewBtn = document.getElementById('stickyDetailedViewBtn');
+
 
         let allServiceDetails = [];
         let originalServiceDetails = [];
@@ -182,8 +265,11 @@
         let activeMethodFilters = {}; // To persist method filters across view changes
         let currentSortState = 'original';
 
+        closeWarningBtn.addEventListener('click', () => {
+            detailedViewWarning.classList.add('hidden');
+        });
+
         fetchButton.addEventListener('click', async () => {
-            // If in detailed view, switch back to simple view on a new fetch.
             if (isDetailedView) {
                 setView(false);
             }
@@ -200,9 +286,11 @@
             expandCollapseContainer.classList.add('hidden');
             viewToggleContainer.classList.add('hidden');
             detailedViewWarning.classList.add('hidden');
+            stickyHeader.classList.add('hidden', '-translate-y-full');
             searchInput.value = '';
+            stickySearchInput.value = '';
             navLinksContainer.innerHTML = '';
-            activeMethodFilters = {}; // Reset filters on new fetch
+            activeMethodFilters = {}; 
             fetchButton.disabled = true;
             fetchButton.classList.add('opacity-50', 'cursor-not-allowed');
             updateResetButtonState();
@@ -260,18 +348,24 @@
                 detailedViewWarning.classList.remove('hidden');
                 navContainer.classList.remove('hidden');
                 searchContainer.classList.remove('hidden');
+                stickyHeader.classList.remove('hidden');
+
 
                 // Build nav links from the filtered list of services that have content
                 validServices.forEach(({ service, swaggerJson }) => {
                     const serviceId = `service-${service.app}`;
-                    navLinksContainer.innerHTML += `<a href="#${serviceId}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition capitalize">${service.app}</a>`;
+                    navLinksContainer.innerHTML += `<a href="#${serviceId}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition capitalize dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">${service.app}</a>`;
                 });
+            } else {
+                 stickyHeader.classList.add('hidden');
+                 viewToggleContainer.classList.add('hidden');
+                 searchContainer.classList.add('hidden');
             }
 
 
             if (validServices.length === 0) {
                 if (searchInput.value) {
-                    resultsDiv.innerHTML = '<p class="text-center text-gray-600">No API endpoints match your search term.</p>';
+                    resultsDiv.innerHTML = '<p class="text-center text-gray-600 dark:text-gray-400">No API endpoints match your search term.</p>';
                 }
                 updateExpandCollapseButtonsState();
                 updateTotalCount();
@@ -282,7 +376,7 @@
             validServices.forEach(({ service, swaggerJson }) => {
                 const serviceId = `service-${service.app}`;
                 const card = document.createElement('div');
-                card.className = 'service-card bg-gray-50 border border-gray-200 rounded-xl p-6 scroll-mt-8';
+                card.className = 'service-card bg-gray-50 border border-gray-200 rounded-xl p-6 scroll-mt-8 dark:bg-gray-800/[.5] dark:border-gray-700';
                 card.id = serviceId;
                 
                 let apiCount = 0;
@@ -323,36 +417,36 @@
                                 const parametersHtml = buildParametersHtml(endpoint.parameters, swaggerJson);
                                 const responsesHtml = buildResponsesHtml(endpoint.responses, swaggerJson);
                                 detailsHtml = `
-                                <div class="endpoint-details border-t border-gray-200">
+                                <div class="endpoint-details border-t border-gray-200 dark:border-gray-700">
                                     <div class="p-4 space-y-6">
                                         ${parametersHtml}
                                         ${responsesHtml}
                                     </div>
                                 </div>`;
-                                chevronHtml = `<svg class="endpoint-chevron w-5 h-5 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                                chevronHtml = `<svg class="endpoint-chevron w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
                                 cursorClass = 'cursor-pointer';
                             }
 
                             return `
-                            <li class="endpoint-item bg-gray-100 rounded-lg" data-method="${endpoint.method}">
+                            <li class="endpoint-item bg-gray-100 dark:bg-gray-900/50 rounded-lg" data-method="${endpoint.method}">
                                 <div class="endpoint-header flex items-center justify-between p-3 ${cursorClass}">
                                     <div class="flex items-center gap-3 flex-wrap">
                                         <span class="font-bold text-xs uppercase px-2 py-1 rounded-md text-white text-center w-20 ${methodColor}">${endpoint.method}</span>
-                                        <span class="font-mono text-sm text-gray-800 break-all">${endpoint.path}</span>
+                                        <span class="font-mono text-sm text-gray-800 dark:text-gray-300 break-all">${endpoint.path}</span>
                                     </div>
                                     ${chevronHtml}
                                 </div>
-                                <p class="text-gray-600 text-sm italic px-3 pb-3">${endpoint.summary || 'No description provided.'}</p>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm italic px-3 pb-3">${endpoint.summary || 'No description provided.'}</p>
                                 ${detailsHtml}
                             </li>`;
                         }).join('');
                         return `<div class="subsection-container mt-6">
-                            <h3 class="text-xl font-semibold text-gray-700">${groupName}</h3>
+                            <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300">${groupName}</h3>
                             <ul class="space-y-2 mt-2 list-none pl-0">${pathList}</ul>
                         </div>`;
                     }).join('');
                 } else {
-                     endpointsHtml = '<p class="text-gray-500 mt-4">No endpoints found for this service.</p>';
+                     endpointsHtml = '<p class="text-gray-500 dark:text-gray-400 mt-4">No endpoints found for this service.</p>';
                 }
                 
                 const currentFilter = activeMethodFilters[serviceId] || 'All';
@@ -367,7 +461,7 @@
                             finalClasses = `${getMethodColor(method)} text-white`;
                         }
                     } else {
-                        finalClasses = 'bg-gray-200 hover:bg-gray-300 text-gray-800';
+                        finalClasses = 'bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300';
                     }
                     return `<button class="method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition ${finalClasses}" data-filter-method="${method}">${method}</button>`;
                 }).join('');
@@ -377,14 +471,14 @@
                 card.innerHTML = `
                     <div class="card-header flex justify-between items-center cursor-pointer">
                         <div>
-                            <h2 class="text-3xl font-bold capitalize text-gray-800 font-figtree">${service.app}</h2>
-                            <p class="api-count text-md text-gray-600 mt-1">${apiCount} API Endpoints</p>
+                            <h2 class="text-3xl font-bold capitalize text-gray-800 font-figtree dark:text-gray-100">${service.app}</h2>
+                            <p class="api-count text-md text-gray-600 dark:text-gray-400 mt-1">${apiCount} API Endpoints</p>
                         </div>
-                        <svg class="collapse-icon w-6 h-6 text-gray-500 transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <svg class="collapse-icon w-6 h-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                     <div class="collapsible-content ${isExpanded ? 'expanded' : ''}">
                         <div>
-                            <div class="method-filter-controls flex flex-wrap gap-2 border-b border-gray-200 pt-4 pb-4">${methodFilterButtons}</div>
+                            <div class="method-filter-controls flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700 pt-4 pb-4">${methodFilterButtons}</div>
                             <div class="endpoints-list mt-2">${endpointsHtml}</div>
                         </div>
                     </div>`;
@@ -413,7 +507,7 @@
 
         function buildParametersHtml(parameters, swaggerJson) {
             if (!parameters || parameters.length === 0) return '';
-            let html = '<h4 class="text-md font-semibold text-gray-700 mb-2">Parameters</h4>';
+            let html = '<h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Parameters</h4>';
             let contentHtml = '';
 
             const bodyParam = parameters.find(p => p.in === 'body');
@@ -421,10 +515,10 @@
             
             if(otherParams.length > 0) {
                 const paramsList = otherParams.map(p => `
-                    <tr class="border-b border-gray-200">
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
                         <td class="py-2 pr-2 font-mono text-sm">${p.name} <span class="text-red-500">${p.required ? '*' : ''}</span></td>
-                        <td class="py-2 pr-2 text-sm capitalize text-gray-600">${p.in}</td>
-                        <td class="py-2 text-sm text-gray-600">${p.description || ''}</td>
+                        <td class="py-2 pr-2 text-sm capitalize text-gray-600 dark:text-gray-400">${p.in}</td>
+                        <td class="py-2 text-sm text-gray-600 dark:text-gray-400">${p.description || ''}</td>
                     </tr>
                 `).join('');
 
@@ -436,7 +530,7 @@
                                 <col class="w-1/6">
                                 <col>
                             </colgroup>
-                            <thead class="text-xs text-gray-500 uppercase">
+                            <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase">
                                 <tr><th class="py-2 pr-2 font-semibold text-left">Name</th><th class="py-2 pr-2 font-semibold text-left">In</th><th class="py-2 font-semibold text-left">Description</th></tr>
                             </thead>
                             <tbody>${paramsList}</tbody>
@@ -448,7 +542,7 @@
             if (bodyParam && bodyParam.schema) {
                 const example = generateExampleFromSchema(bodyParam.schema, swaggerJson);
                 contentHtml += `
-                    <h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Request Body</h4>
+                    <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mt-4 mb-2">Request Body</h4>
                     <div class="code-block-container bg-gray-800 rounded-lg overflow-hidden">
                         <div class="bg-gray-700/50 p-2 flex justify-end">
                             <button title="Copy to clipboard" class="copy-btn p-1 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">
@@ -469,7 +563,7 @@
             if (numericCode >= 200 && numericCode < 300) return 'text-green-600';
             if (numericCode >= 300 && numericCode < 400) return 'text-yellow-600';
             if (numericCode >= 400 && numericCode < 600) return 'text-red-600';
-            return 'text-gray-600';
+            return 'text-gray-600 dark:text-gray-400';
         }
 
         function buildResponsesHtml(responses, swaggerJson) {
@@ -481,10 +575,10 @@
                     const example = generateExampleFromSchema(resp.schema, swaggerJson);
                     if (example) {
                         schemaHtml = `
-                            <tr class="bg-gray-50">
+                            <tr class="bg-gray-50 dark:bg-gray-900/30">
                                 <td colspan="2" class="py-2 px-1">
                                     <details>
-                                        <summary class="text-xs text-gray-500 cursor-pointer">Example Response</summary>
+                                        <summary class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer">Example Response</summary>
                                         <div class="code-block-container bg-gray-800 rounded-lg overflow-hidden mt-2">
                                             <div class="bg-gray-700/50 p-2 flex justify-end">
                                                 <button title="Copy to clipboard" class="copy-btn p-1 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">
@@ -500,23 +594,23 @@
                     }
                 }
                 return `
-                    <tr class="border-b border-gray-200">
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
                         <td class="py-2 pr-2 font-mono text-sm font-bold ${colorClass}">${code}</td>
-                        <td class="py-2 text-sm text-gray-600">${resp.description || ''}</td>
+                        <td class="py-2 text-sm text-gray-600 dark:text-gray-400">${resp.description || ''}</td>
                     </tr>
                     ${schemaHtml}
                 `;
             }).join('');
             
             return `
-                <h4 class="text-md font-semibold text-gray-700 mb-2">Responses</h4>
+                <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Responses</h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                          <colgroup>
                             <col class="w-1/6">
                             <col>
                         </colgroup>
-                        <thead class="text-xs text-gray-500 uppercase">
+                        <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase">
                             <tr><th class="py-2 pr-2 font-semibold">Code</th><th class="py-2 font-semibold">Description</th></tr>
                         </thead>
                         <tbody>${responsesList}</tbody>
@@ -696,7 +790,6 @@
                     content.classList.toggle('expanded');
                     icon.classList.toggle('rotate-180');
 
-                    // If the card is now hidden (was just collapsed), reset all children
                     if (!content.classList.contains('expanded')) {
                         content.querySelectorAll('.endpoint-details.expanded').forEach(details => {
                             details.classList.remove('expanded');
@@ -704,7 +797,6 @@
                         content.querySelectorAll('.endpoint-chevron.rotate-180').forEach(chevron => {
                             chevron.classList.remove('rotate-180');
                         });
-                        // Also collapse 'Example Response' details
                         content.querySelectorAll('details[open]').forEach(details => {
                             details.removeAttribute('open');
                         });
@@ -732,7 +824,6 @@
                 content.classList.remove('expanded');
                 icon.classList.add('rotate-180');
 
-                // Also reset all children when collapsing all
                 content.querySelectorAll('.endpoint-details.expanded').forEach(details => {
                     details.classList.remove('expanded');
                 });
@@ -756,17 +847,16 @@
                     const filter = e.target.dataset.filterMethod;
                     const serviceId = card.id;
 
-                    // Store the state
                     activeMethodFilters[serviceId] = filter;
                     if (filter === 'All') {
                         delete activeMethodFilters[serviceId];
                     }
                     
                     controls.querySelectorAll('.method-filter-btn').forEach(btn => {
-                         btn.className = 'method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition bg-gray-200 hover:bg-gray-300 text-gray-800';
+                         btn.className = 'method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300';
                     });
                     
-                    e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
+                    e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800', 'dark:bg-gray-700', 'dark:hover:bg-gray-600', 'dark:text-gray-300');
                     if (filter === 'All') {
                         e.target.classList.add('bg-blue-600', 'text-white');
                     } else {
@@ -803,19 +893,17 @@
         resetFiltersButton.addEventListener('click', () => {
             activeMethodFilters = {};
             document.querySelectorAll('.service-card').forEach(card => {
-                // Reset UI
                 const controls = card.querySelector('.method-filter-controls');
                 if (controls) {
                     controls.querySelectorAll('.method-filter-btn').forEach(btn => {
-                        btn.className = 'method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition bg-gray-200 hover:bg-gray-300 text-gray-800';
+                        btn.className = 'method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300';
                     });
                     const allButton = controls.querySelector('[data-filter-method="All"]');
                     if(allButton) {
-                        allButton.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
+                        allButton.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800', 'dark:bg-gray-700', 'dark:hover:bg-gray-600', 'dark:text-gray-300');
                         allButton.classList.add('bg-blue-600', 'text-white');
                     }
                 }
-                // Re-apply "All" filter
                 applyMethodFilterToCard(card, 'All');
             });
             updateResetButtonState();
@@ -843,8 +931,6 @@
             });
 
             const searchTerm = searchInput.value.toLowerCase().trim();
-            
-            // Note: We use the master `allServiceDetails` which is now sorted/unsorted correctly
             const servicesToProcess = allServiceDetails;
 
             const filteredServices = JSON.parse(JSON.stringify(servicesToProcess)).map(detail => {
@@ -870,30 +956,39 @@
 
         function setView(detailed) {
             isDetailedView = detailed;
+            const transformValue = detailed ? 'translateX(100%)' : 'translateX(0)';
 
-            const indicator = document.getElementById('view-toggle-indicator');
+            // Update main toggle
+            document.getElementById('view-toggle-indicator').style.transform = transformValue;
+            simpleViewBtn.classList.toggle('text-blue-600', !detailed);
+            simpleViewBtn.classList.toggle('text-gray-600', detailed);
+            detailedViewBtn.classList.toggle('text-blue-600', detailed);
+            detailedViewBtn.classList.toggle('text-gray-600', !detailed);
 
-            if (isDetailedView) {
-                indicator.style.transform = 'translateX(100%)';
-                simpleViewBtn.classList.remove('text-blue-600');
-                simpleViewBtn.classList.add('text-gray-600');
-                detailedViewBtn.classList.add('text-blue-600');
-                detailedViewBtn.classList.remove('text-gray-600');
-            } else {
-                indicator.style.transform = 'translateX(0)';
-                detailedViewBtn.classList.remove('text-blue-600');
-                detailedViewBtn.classList.add('text-gray-600');
-                simpleViewBtn.classList.add('text-blue-600');
-                simpleViewBtn.classList.remove('text-gray-600');
-            }
+             // Update sticky toggle
+            document.getElementById('sticky-view-toggle-indicator').style.transform = transformValue;
+            stickySimpleViewBtn.classList.toggle('text-blue-600', !detailed);
+            stickySimpleViewBtn.classList.toggle('text-gray-600', detailed);
+            stickyDetailedViewBtn.classList.toggle('text-blue-600', detailed);
+            stickyDetailedViewBtn.classList.toggle('text-gray-600', !detailed);
 
             triggerSearchAndRender();
         }
 
         simpleViewBtn.addEventListener('click', () => setView(false));
         detailedViewBtn.addEventListener('click', () => setView(true));
+        stickySimpleViewBtn.addEventListener('click', () => setView(false));
+        stickyDetailedViewBtn.addEventListener('click', () => setView(true));
+
+
+        // Sync search inputs
+        stickySearchInput.addEventListener('input', () => {
+            searchInput.value = stickySearchInput.value;
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
 
         searchInput.addEventListener('input', () => {
+            stickySearchInput.value = searchInput.value;
             const searchTerm = searchInput.value.toLowerCase().trim();
             clearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
             triggerSearchAndRender();
@@ -901,10 +996,9 @@
 
         clearSearchButton.addEventListener('click', () => {
             searchInput.value = '';
-            clearSearchButton.classList.add('hidden');
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
             activeMethodFilters = {}; // Also reset method filters
             
-            // If in detailed view, switch to simple view. Otherwise, just re-render.
             if (isDetailedView) {
                 setView(false); 
             } else {
@@ -916,8 +1010,18 @@
             }
         });
 
+        let isStickyHeaderSetup = false;
         window.onscroll = () => {
             toTopButton.classList.toggle('hidden', document.body.scrollTop <= 100 && document.documentElement.scrollTop <= 100);
+
+            if (searchContainer && stickyHeader && searchContainer.offsetParent !== null) {
+                const rect = searchContainer.getBoundingClientRect();
+                if (rect.bottom < 10) { 
+                    stickyHeader.classList.remove('-translate-y-full');
+                } else {
+                    stickyHeader.classList.add('-translate-y-full');
+                }
+            }
         };
         
         toTopButton.addEventListener('click', () => {
@@ -940,4 +1044,3 @@
     </script>
 </body>
 </html>
-
