@@ -80,35 +80,106 @@
          .code-block-container pre::-webkit-scrollbar-thumb:hover {
             background-color: #718096; /* gray-500 */
         }
+        .highlight-body-field {
+            background-color: rgba(236, 72, 153, 0.3); /* pink-500 with opacity, slightly brighter */
+            border-radius: 3px;
+            padding: 1px 3px;
+        }
+        .highlight-response-field {
+            background-color: rgba(253, 186, 116, 0.4); /* orange-300 with opacity */
+            border-radius: 3px;
+            padding: 1px 3px;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .code-line {
+            display: flex;
+        }
+        .line-number {
+            min-width: 2.5em; /* Space for line numbers */
+            padding-right: 1em;
+            text-align: right;
+            user-select: none;
+            color: #6b7280; /* gray-500 */
+        }
+        .dark .line-number {
+            color: #4b5563; /* gray-600 */
+        }
+        pre.no-wrap .line-content {
+            white-space: pre;
+        }
+        pre.word-wrap .line-content {
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 transition-colors duration-300">
 
     <!-- Sticky Header -->
     <div id="sticky-header" class="hidden fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md z-50 transition-transform duration-300 ease-in-out transform -translate-y-full">
-        <div class="container mx-auto p-3 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5zM10 13.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5z"/>
-                </svg>
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white font-figtree hidden sm:block">Docebo API Searcher</h2>
-            </div>
-             <!-- Sticky Search -->
-            <div class="flex-grow px-4 md:px-8">
-                <div class="max-w-2xl mx-auto relative">
-                    <input type="search" id="stickySearchInput" class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Filter by URL or description...">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <div class="container mx-auto p-3 flex flex-col gap-3">
+            <!-- Top Row: Title and View Toggle -->
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5zM10 13.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5z"/>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white font-figtree hidden sm:block">Docebo API Searcher</h2>
+                </div>
+                <div id="sticky-view-toggle-container" class="flex items-center justify-start gap-2 flex-shrink-0">
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 hidden md:block">View:</h3>
+                    <div id="sticky-view-toggle-switch" class="relative flex items-center rounded-lg bg-gray-200 dark:bg-gray-700 p-1 w-40">
+                        <div id="sticky-view-toggle-indicator" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-white dark:bg-gray-600 rounded-md shadow transition-transform duration-300 ease-in-out"></div>
+                        <button id="stickySimpleViewBtn" class="relative w-1/2 py-1 text-sm font-semibold z-10 transition-colors">Simple</button>
+                        <button id="stickyDetailedViewBtn" class="relative w-1/2 py-1 text-sm font-semibold z-10 transition-colors">Detailed</button>
                     </div>
                 </div>
             </div>
-            <!-- Sticky View Toggle -->
-            <div id="sticky-view-toggle-container" class="flex items-center justify-start gap-2 flex-shrink-0">
-                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 hidden md:block">View:</h3>
-                <div id="sticky-view-toggle-switch" class="relative flex items-center rounded-lg bg-gray-200 dark:bg-gray-700 p-1 w-40">
-                    <div id="sticky-view-toggle-indicator" class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] bg-white dark:bg-gray-600 rounded-md shadow transition-transform duration-300 ease-in-out"></div>
-                    <button id="stickySimpleViewBtn" class="relative w-1/2 py-1 text-sm font-semibold z-10 transition-colors">Simple</button>
-                    <button id="stickyDetailedViewBtn" class="relative w-1/2 py-1 text-sm font-semibold z-10 transition-colors">Detailed</button>
+            <!-- Bottom Row: Search Boxes -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-2">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">URL/Desc</label>
+                    <div class="relative">
+                        <input type="search" id="stickySearchInput" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., batch">
+                        <button id="stickyClearSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Parameter</label>
+                    <div class="relative">
+                        <input type="search" id="stickyParamSearchInput" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., sort_by">
+                         <button id="stickyClearParamSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Body Field</label>
+                    <div class="relative">
+                        <input type="search" id="stickyBodySearchInput" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., user_id">
+                         <button id="stickyClearBodySearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Response Field</label>
+                    <div class="relative">
+                        <input type="search" id="stickyResponseSearchInput" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., first_name">
+                         <button id="stickyClearResponseSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -156,15 +227,80 @@
             </div>
             
             <div id="search-container" class="hidden my-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Search for APIs</h3>
-                <div class="relative">
-                    <input type="search" id="searchInput" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Filter by URL or description...">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Search for APIs</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Path/Description Search -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">URL / Description</label>
+                             <div class="relative tooltip-container">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <div class="tooltip-text absolute z-10 -top-2 -translate-y-full w-60 p-2 text-xs text-white bg-gray-700 rounded-lg shadow-lg">
+                                    Search for text in the API endpoint path or its summary/description.
+                                 </div>
+                             </div>
+                        </div>
+                        <div class="relative">
+                            <input type="search" id="searchInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., batch">
+                            <button id="clearSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
                     </div>
-                    <button id="clearSearchButton" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <!-- Parameter Search -->
+                    <div>
+                         <div class="flex items-center gap-2 mb-1">
+                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Parameter Name</label>
+                             <div class="relative tooltip-container">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <div class="tooltip-text absolute z-10 -top-2 -translate-y-full w-60 p-2 text-xs text-white bg-gray-700 rounded-lg shadow-lg">
+                                    Search for a specific query, path, or header parameter by name. Highlights in yellow.
+                                 </div>
+                             </div>
+                        </div>
+                        <div class="relative">
+                            <input type="search" id="paramSearchInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., sort_by">
+                             <button id="clearParamSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Body Field Search -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Request Body Field</label>
+                             <div class="relative tooltip-container">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <div class="tooltip-text absolute z-10 -top-2 -translate-y-full w-60 p-2 text-xs text-white bg-gray-700 rounded-lg shadow-lg">
+                                    Search for a field within the JSON request body. Highlights in pink.
+                                 </div>
+                             </div>
+                        </div>
+                        <div class="relative">
+                            <input type="search" id="bodySearchInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., user_id">
+                             <button id="clearBodySearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Response Field Search -->
+                     <div>
+                        <div class="flex items-center gap-2 mb-1">
+                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Response Body Field</label>
+                            <div class="relative tooltip-container">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <div class="tooltip-text absolute z-10 -top-2 -translate-y-full w-60 p-2 text-xs text-white bg-gray-700 rounded-lg shadow-lg">
+                                    Search for a field within the JSON example response. Highlights in orange.
+                                 </div>
+                             </div>
+                        </div>
+                        <div class="relative">
+                            <input type="search" id="responseSearchInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="e.g., first_name">
+                             <button id="clearResponseSearchInputBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -182,7 +318,7 @@
             <div id="expand-collapse-container" class="hidden flex justify-between items-center gap-2 mb-4">
                 <div id="total-api-count" class="text-gray-600 dark:text-gray-400 text-sm font-semibold"></div>
                 <div class="flex items-center gap-2">
-                    <button id="resetFiltersButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Reset Filters</button>
+                    <button id="resetFiltersButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Reset Method Filters</button>
                     <button id="expandAllButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">Expand All</button>
                     <button id="collapseAllButton" class="bg-blue-100 text-blue-700 text-xs font-semibold py-1 px-3 rounded-full hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">Collapse All</button>
                 </div>
@@ -246,7 +382,13 @@
         const toTopButton = document.getElementById('to-top-button');
         const searchContainer = document.getElementById('search-container');
         const searchInput = document.getElementById('searchInput');
-        const clearSearchButton = document.getElementById('clearSearchButton');
+        const paramSearchInput = document.getElementById('paramSearchInput');
+        const bodySearchInput = document.getElementById('bodySearchInput');
+        const responseSearchInput = document.getElementById('responseSearchInput');
+        const clearSearchInputBtn = document.getElementById('clearSearchInputBtn');
+        const clearParamSearchInputBtn = document.getElementById('clearParamSearchInputBtn');
+        const clearBodySearchInputBtn = document.getElementById('clearBodySearchInputBtn');
+        const clearResponseSearchInputBtn = document.getElementById('clearResponseSearchInputBtn');
         const expandAllButton = document.getElementById('expandAllButton');
         const collapseAllButton = document.getElementById('collapseAllButton');
         const expandCollapseContainer = document.getElementById('expand-collapse-container');
@@ -263,14 +405,21 @@
         // Sticky Header elements
         const stickyHeader = document.getElementById('sticky-header');
         const stickySearchInput = document.getElementById('stickySearchInput');
+        const stickyParamSearchInput = document.getElementById('stickyParamSearchInput');
+        const stickyBodySearchInput = document.getElementById('stickyBodySearchInput');
+        const stickyResponseSearchInput = document.getElementById('stickyResponseSearchInput');
+        const stickyClearSearchInputBtn = document.getElementById('stickyClearSearchInputBtn');
+        const stickyClearParamSearchInputBtn = document.getElementById('stickyClearParamSearchInputBtn');
+        const stickyClearBodySearchInputBtn = document.getElementById('stickyClearBodySearchInputBtn');
+        const stickyClearResponseSearchInputBtn = document.getElementById('stickyClearResponseSearchInputBtn');
         const stickySimpleViewBtn = document.getElementById('stickySimpleViewBtn');
         const stickyDetailedViewBtn = document.getElementById('stickyDetailedViewBtn');
 
 
         let allServiceDetails = [];
         let originalServiceDetails = [];
-        let isDetailedView = false; // Default to simple view
-        let activeMethodFilters = {}; // To persist method filters across view changes
+        let isDetailedView = false; 
+        let activeMethodFilters = {};
         let currentSortState = 'original';
 
         closeWarningBtn.addEventListener('click', () => {
@@ -280,7 +429,7 @@
 
         fetchButton.addEventListener('click', async () => {
             if (isDetailedView) {
-                setView(false, true); // Don't trigger render
+                setView(false, true);
             }
 
             const baseUrl = baseUrlInput.value.trim();
@@ -298,6 +447,12 @@
             stickyHeader.classList.add('hidden', '-translate-y-full');
             searchInput.value = '';
             stickySearchInput.value = '';
+            paramSearchInput.value = ''; 
+            stickyParamSearchInput.value = ''; 
+            bodySearchInput.value = '';
+            stickyBodySearchInput.value = '';
+            responseSearchInput.value = '';
+            stickyResponseSearchInput.value = '';
             navLinksContainer.innerHTML = '';
             activeMethodFilters = {}; 
             fetchButton.disabled = true;
@@ -349,6 +504,9 @@
             resultsDiv.innerHTML = '';
             navLinksContainer.innerHTML = '';
             
+            const paramSearchTerm = paramSearchInput.value.toLowerCase().trim();
+            const bodySearchTerm = bodySearchInput.value.toLowerCase().trim();
+            const responseSearchTerm = responseSearchInput.value.toLowerCase().trim();
             const hasAnyServices = allServiceDetails.some(d => d.swaggerJson && Object.keys(d.swaggerJson.paths || {}).length > 0);
             const validServices = serviceDetailsToRender.filter(d => d.swaggerJson && Object.keys(d.swaggerJson.paths || {}).length > 0);
 
@@ -361,9 +519,7 @@
                 searchContainer.classList.remove('hidden');
                 stickyHeader.classList.remove('hidden');
 
-
-                // Build nav links from the filtered list of services that have content
-                validServices.forEach(({ service, swaggerJson }) => {
+                validServices.forEach(({ service }) => {
                     const serviceId = `service-${service.app}`;
                     navLinksContainer.innerHTML += `<a href="#${serviceId}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition capitalize dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">${service.app}</a>`;
                 });
@@ -374,17 +530,15 @@
                  detailedViewWarning.classList.add('hidden');
             }
 
-
             if (validServices.length === 0) {
-                if (searchInput.value) {
-                    resultsDiv.innerHTML = '<p class="text-center text-gray-600 dark:text-gray-400">No API endpoints match your search term.</p>';
+                if (searchInput.value || paramSearchInput.value || bodySearchInput.value || responseSearchInput.value) {
+                    resultsDiv.innerHTML = '<p class="text-center text-gray-600 dark:text-gray-400">No API endpoints match your search criteria.</p>';
                 }
                 updateExpandCollapseButtonsState();
                 updateTotalCount();
                 return;
             }
             
-            // Render service cards from the provided list (which could be filtered or sorted)
             validServices.forEach(({ service, swaggerJson }) => {
                 const serviceId = `service-${service.app}`;
                 const card = document.createElement('div');
@@ -403,11 +557,7 @@
                         if (endpointInfo && Array.isArray(endpointInfo.tags) && endpointInfo.tags.length > 0) {
                             const tag = endpointInfo.tags[0];
                             if (!groupedEndpoints[tag]) groupedEndpoints[tag] = [];
-                            groupedEndpoints[tag].push({ 
-                                path, 
-                                method: method.toUpperCase(), 
-                                ...endpointInfo 
-                            });
+                            groupedEndpoints[tag].push({ path, method: method.toUpperCase(), ...endpointInfo });
                         }
                     }
                 }
@@ -426,8 +576,8 @@
                             let cursorClass = '';
 
                             if (isDetailedView) {
-                                const parametersHtml = buildParametersHtml(endpoint.parameters, swaggerJson);
-                                const responsesHtml = buildResponsesHtml(endpoint.responses, swaggerJson);
+                                const parametersHtml = buildParametersHtml(endpoint.parameters, swaggerJson, paramSearchTerm, bodySearchTerm);
+                                const responsesHtml = buildResponsesHtml(endpoint.responses, swaggerJson, responseSearchTerm);
                                 detailsHtml = `
                                 <div class="endpoint-details border-t border-gray-200 dark:border-gray-700">
                                     <div class="p-4 space-y-6">
@@ -478,7 +628,7 @@
                     return `<button class="method-filter-btn px-3 py-1 text-sm font-medium rounded-md transition ${finalClasses}" data-filter-method="${method}">${method}</button>`;
                 }).join('');
                 
-                const isExpanded = expansionStates[serviceId] !== false; // Default to true (expanded)
+                const isExpanded = expansionStates[serviceId] !== false;
 
                 card.innerHTML = `
                     <div class="card-header flex justify-between items-center cursor-pointer">
@@ -502,12 +652,13 @@
             if (isDetailedView) {
                 addEndpointExpansion();
                 addCopyFunctionality();
+                addCommentToggleFunctionality();
+                addWordWrapToggleFunctionality();
             }
             updateExpandCollapseButtonsState();
             updateResetButtonState();
             updateTotalCount();
             
-            // Re-apply any active method filters
             document.querySelectorAll('.service-card').forEach(card => {
                 const serviceId = card.id;
                 const filter = activeMethodFilters[serviceId] || 'All';
@@ -517,7 +668,7 @@
             });
         }
 
-        function buildParametersHtml(parameters, swaggerJson) {
+        function buildParametersHtml(parameters, swaggerJson, paramSearchTerm = '', bodySearchTerm = '') {
             if (!parameters || parameters.length === 0) return '';
             let html = '<h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Parameters</h4>';
             let contentHtml = '';
@@ -526,13 +677,17 @@
             const otherParams = parameters.filter(p => p.in !== 'body');
             
             if(otherParams.length > 0) {
-                const paramsList = otherParams.map(p => `
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <td class="py-2 pr-2 font-mono text-sm">${p.name} <span class="text-red-500">${p.required ? '*' : ''}</span></td>
-                        <td class="py-2 pr-2 text-sm capitalize text-gray-600 dark:text-gray-400">${p.in}</td>
-                        <td class="py-2 text-sm text-gray-600 dark:text-gray-400">${p.description || ''}</td>
+                const paramsList = otherParams.map(p => {
+                    const isHighlighted = paramSearchTerm && p.name.toLowerCase().includes(paramSearchTerm);
+                    const highlightClass = isHighlighted ? 'bg-yellow-200 dark:bg-yellow-800/50' : '';
+
+                    return `
+                    <tr class="border-b border-gray-200 dark:border-gray-700 ${highlightClass}">
+                        <td class="p-2 pr-2 font-mono text-sm">${p.name} <span class="text-red-500">${p.required ? '*' : ''}</span></td>
+                        <td class="p-2 pr-2 text-sm capitalize text-gray-600 dark:text-gray-400">${p.in}</td>
+                        <td class="p-2 text-sm text-gray-600 dark:text-gray-400">${p.description || ''}</td>
                     </tr>
-                `).join('');
+                `}).join('');
 
                 contentHtml += `
                     <div class="overflow-x-auto">
@@ -543,7 +698,7 @@
                                 <col>
                             </colgroup>
                             <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                <tr><th class="py-2 pr-2 font-semibold text-left">Name</th><th class="py-2 pr-2 font-semibold text-left">In</th><th class="py-2 font-semibold text-left">Description</th></tr>
+                                <tr><th class="p-2 pr-2 font-semibold text-left">Name</th><th class="p-2 pr-2 font-semibold text-left">In</th><th class="p-2 font-semibold text-left">Description</th></tr>
                             </thead>
                             <tbody>${paramsList}</tbody>
                         </table>
@@ -552,23 +707,44 @@
             }
 
             if (bodyParam && bodyParam.schema) {
-                const example = generateExampleFromSchema(bodyParam.schema, swaggerJson);
+                const exampleNoComments = generateExampleWithComments(bodyParam.schema, swaggerJson, 'none');
+                
+                const highlightedAll = generateRichExampleWithComments(bodyParam.schema, swaggerJson, 'all', bodySearchTerm, 'highlight-body-field');
+                const highlightedPrimitive = generateRichExampleWithComments(bodyParam.schema, swaggerJson, 'primitive', bodySearchTerm, 'highlight-body-field');
+                const highlightedNone = generateRichExampleWithComments(bodyParam.schema, swaggerJson, 'none', bodySearchTerm, 'highlight-body-field');
+                
+                const lines = highlightedAll.split('\n');
+                let finalCodeHtml = '';
+                for (let i = 0; i < lines.length; i++) {
+                    finalCodeHtml += `<div class="code-line"><span class="line-number">${i + 1}</span><span class="line-content">${lines[i]}</span></div>`;
+                }
+
                 contentHtml += `
                     <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mt-4 mb-2">Request Body</h4>
                     <div class="code-block-container bg-gray-800 rounded-lg overflow-hidden">
-                        <div class="bg-gray-700/50 p-2 flex justify-end">
-                            <button title="Copy to clipboard" class="copy-btn p-1 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">
+                        <div class="bg-gray-700/50 p-2 flex justify-end items-center gap-2">
+                             <button title="Toggle Word Wrap" class="toggle-wrap-btn py-1 px-2 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center" data-wrapped="false">
+                                <span class="text-xs font-semibold text-gray-300">Wrap: off</span>
+                             </button>
+                             <button title="Toggle Comments" class="toggle-comments-btn py-1 px-2 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center" data-comment-state="all">
+                                <span class="text-xs font-semibold text-gray-300">Comments: Full</span>
+                             </button>
+                            <button title="Copy to clipboard" class="copy-btn p-1.5 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                             </button>
                         </div>
-                        <pre class="text-white text-sm p-4 max-h-[500px] overflow-auto"><code>${syntaxHighlight(example)}</code></pre>
+                        <pre class="text-white text-sm p-4 max-h-[500px] overflow-auto no-wrap"><code 
+                            data-state-all="${encodeURIComponent(highlightedAll)}"
+                            data-state-primitive="${encodeURIComponent(highlightedPrimitive)}"
+                            data-state-none="${encodeURIComponent(highlightedNone)}"
+                            data-plain-text="${encodeURIComponent(exampleNoComments)}"
+                        >${finalCodeHtml}</code></pre>
                     </div>
                 `;
             }
 
             return html + contentHtml;
         }
-
 
         function getResponseCodeColor(code) {
             const numericCode = parseInt(code, 10);
@@ -578,26 +754,48 @@
             return 'text-gray-600 dark:text-gray-400';
         }
 
-        function buildResponsesHtml(responses, swaggerJson) {
+        function buildResponsesHtml(responses, swaggerJson, responseSearchTerm = '') {
             if (!responses || Object.keys(responses).length === 0) return '';
             const responsesList = Object.entries(responses).map(([code, resp]) => {
                 const colorClass = getResponseCodeColor(code);
                 let schemaHtml = '';
                 if (resp.schema) {
-                    const example = generateExampleFromSchema(resp.schema, swaggerJson);
-                    if (example) {
+                    const exampleNoComments = generateExampleWithComments(resp.schema, swaggerJson, 'none');
+
+                    const highlightedAll = generateRichExampleWithComments(resp.schema, swaggerJson, 'all', responseSearchTerm, 'highlight-response-field');
+                    const highlightedPrimitive = generateRichExampleWithComments(resp.schema, swaggerJson, 'primitive', responseSearchTerm, 'highlight-response-field');
+                    const highlightedNone = generateRichExampleWithComments(resp.schema, swaggerJson, 'none', responseSearchTerm, 'highlight-response-field');
+
+                    const lines = highlightedAll.split('\n');
+                    let finalCodeHtml = '';
+                    for (let i = 0; i < lines.length; i++) {
+                        finalCodeHtml += `<div class="code-line"><span class="line-number">${i + 1}</span><span class="line-content">${lines[i]}</span></div>`;
+                    }
+
+                    if (exampleNoComments) {
                         schemaHtml = `
                             <tr class="bg-gray-50 dark:bg-gray-900/30">
                                 <td colspan="2" class="py-2 px-1">
                                     <details>
                                         <summary class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer">Example Response</summary>
                                         <div class="code-block-container bg-gray-800 rounded-lg overflow-hidden mt-2">
-                                            <div class="bg-gray-700/50 p-2 flex justify-end">
-                                                <button title="Copy to clipboard" class="copy-btn p-1 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">
+                                            <div class="bg-gray-700/50 p-2 flex justify-end items-center gap-2">
+                                                <button title="Toggle Word Wrap" class="toggle-wrap-btn py-1 px-2 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center" data-wrapped="false">
+                                                    <span class="text-xs font-semibold text-gray-300">Wrap: off</span>
+                                                 </button>
+                                                 <button title="Toggle Comments" class="toggle-comments-btn py-1 px-2 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center" data-comment-state="all">
+                                                    <span class="text-xs font-semibold text-gray-300">Comments: Full</span>
+                                                 </button>
+                                                <button title="Copy to clipboard" class="copy-btn p-1.5 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                                 </button>
                                             </div>
-                                            <pre class="text-white text-sm p-4 max-h-[500px] overflow-auto"><code>${syntaxHighlight(example)}</code></pre>
+                                            <pre class="text-white text-sm p-4 max-h-[500px] overflow-auto no-wrap"><code
+                                                data-state-all="${encodeURIComponent(highlightedAll)}"
+                                                data-state-primitive="${encodeURIComponent(highlightedPrimitive)}"
+                                                data-state-none="${encodeURIComponent(highlightedNone)}"
+                                                data-plain-text="${encodeURIComponent(exampleNoComments)}"
+                                            >${finalCodeHtml}</code></pre>
                                         </div>
                                     </details>
                                 </td>
@@ -617,13 +815,13 @@
             return `
                 <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Responses</h4>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="w-full text-left param-table">
                          <colgroup>
                             <col class="w-1/6">
                             <col>
                         </colgroup>
                         <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                            <tr><th class="py-2 pr-2 font-semibold">Code</th><th class="py-2 font-semibold">Description</th></tr>
+                            <tr><th class="py-2 pr-2 font-semibold">Code</th><th class="py-2 pr-2 font-semibold">Description</th></tr>
                         </thead>
                         <tbody>${responsesList}</tbody>
                     </table>
@@ -638,9 +836,8 @@
             document.querySelectorAll('.copy-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const container = button.closest('.code-block-container');
-                    const pre = container.querySelector('pre');
-                    const code = pre.querySelector('code');
-                    const textToCopy = code.innerText;
+                    const code = container.querySelector('code');
+                    let textToCopy = code.dataset.plainText ? decodeURIComponent(code.dataset.plainText) : code.innerText;
 
                     const textArea = document.createElement('textarea');
                     textArea.value = textToCopy;
@@ -656,6 +853,65 @@
                 });
             });
         }
+        
+        function addCommentToggleFunctionality() {
+            document.querySelectorAll('.toggle-comments-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const codeContainer = button.closest('.code-block-container');
+                    if (!codeContainer) return;
+                    
+                    const codeEl = codeContainer.querySelector('code');
+                    const currentState = button.dataset.commentState;
+                    let nextState;
+                    let nextText;
+
+                    if (currentState === 'all') {
+                        nextState = 'primitive';
+                        nextText = 'Comments: Limited';
+                    } else if (currentState === 'primitive') {
+                        nextState = 'none';
+                        nextText = 'Comments: Off';
+                    } else { // 'none'
+                        nextState = 'all';
+                        nextText = 'Comments: Full';
+                    }
+                    
+                    button.dataset.commentState = nextState;
+                    button.querySelector('span').textContent = nextText;
+
+                    const stateKey = 'state' + nextState.charAt(0).toUpperCase() + nextState.slice(1);
+                    const newHtml = decodeURIComponent(codeEl.dataset[stateKey]);
+
+                    // Rebuild the line-numbered HTML
+                    const lines = newHtml.split('\n');
+                    let finalCodeHtml = '';
+                    for (let i = 0; i < lines.length; i++) {
+                        finalCodeHtml += `<div class="code-line"><span class="line-number">${i + 1}</span><span class="line-content">${lines[i]}</span></div>`;
+                    }
+                    codeEl.innerHTML = finalCodeHtml;
+                });
+            });
+        }
+
+
+        function addWordWrapToggleFunctionality() {
+            document.querySelectorAll('.toggle-wrap-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const pre = button.closest('.code-block-container').querySelector('pre');
+                    if (!pre) return;
+
+                    const isWrapped = button.dataset.wrapped === 'true';
+                    const nextWrapState = !isWrapped;
+                    
+                    pre.classList.toggle('no-wrap', !nextWrapState);
+                    pre.classList.toggle('word-wrap', nextWrapState);
+                    
+                    button.dataset.wrapped = nextWrapState;
+                    button.querySelector('span').textContent = `Wrap: ${nextWrapState ? 'on' : 'off'}`;
+                });
+            });
+        }
+
 
         function resolveRef(ref, swaggerJson) {
             if (!ref || !ref.startsWith('#/')) return null;
@@ -671,8 +927,234 @@
             return current;
         }
 
+        function generateExampleWithComments(schema, swaggerJson, commentMode = 'all') {
+            // Helper to get a primitive value example as a string
+            function getPrimitiveExample(s) {
+                if (s.enum && s.enum.length > 0) return JSON.stringify(s.enum[0]);
+                if (s.format === 'date' || s.format === 'date-time') return '"2025-09-12"';
+                switch (s.type) {
+                    case 'string': return '"string"';
+                    case 'integer': case 'number': return '0';
+                    case 'boolean': return 'true';
+                    default: return '{}';
+                }
+            }
+
+            // Main recursive function to build the formatted string
+            function _generate(currentSchema, indentLevel, visitedRefs = new Set()) {
+                if (!currentSchema) return '{}';
+
+                // Handle schema references
+                if (currentSchema.$ref) {
+                    if (visitedRefs.has(currentSchema.$ref)) return '"/* Circular Reference */"';
+                    visitedRefs.add(currentSchema.$ref);
+                    const resolved = resolveRef(currentSchema.$ref, swaggerJson);
+                    const result = _generate(resolved, indentLevel, visitedRefs);
+                    visitedRefs.delete(currentSchema.$ref);
+                    return result;
+                }
+                
+                // Utility to decode HTML entities from descriptions
+                const decodeHtmlEntities = (text) => {
+                    if (!text || typeof document === 'undefined') return text;
+                    const textArea = document.createElement('textarea');
+                    textArea.innerHTML = text;
+                    return textArea.value;
+                };
+
+                const indent = '  '.repeat(indentLevel);
+                const childIndent = '  '.repeat(indentLevel + 1);
+                // Infer type if missing, which is valid for objects with properties
+                const schemaType = currentSchema.type || (currentSchema.properties ? 'object' : undefined);
+
+                switch (schemaType) {
+                    case 'object':
+                        const properties = currentSchema.properties;
+                        if (!properties || Object.keys(properties).length === 0) return '{}';
+
+                        const requiredFields = new Set(currentSchema.required || []);
+                        const keys = Object.keys(properties);
+
+                        const lines = keys.map((key, index) => {
+                            const propSchema = properties[key];
+                            const propType = propSchema.type || (propSchema.properties ? 'object' : 'object');
+                            const isLast = index === keys.length - 1;
+                            
+                            const valueString = _generate(propSchema, indentLevel + 1, visitedRefs);
+
+                            let showComment = false;
+                            if (commentMode === 'all') {
+                                showComment = true;
+                            } else if (commentMode === 'primitive' && propType !== 'object' && propType !== 'array') {
+                                showComment = true;
+                            }
+
+                            const isRequired = requiredFields.has(key) ? '(required)' : '(optional)';
+                            let description = propSchema.description ? decodeHtmlEntities(propSchema.description).replace(/\s+/g, ' ').trim() : '';
+                            
+                             if (propSchema.enum && Array.isArray(propSchema.enum) && propSchema.enum.length > 0) {
+                                let enumString = "Can be ";
+                                if (propSchema.enum.length === 1) {
+                                    enumString += `${propSchema.enum[0]}.`;
+                                } else if (propSchema.enum.length === 2) {
+                                    enumString += `${propSchema.enum.join(' or ')}.`;
+                                } else {
+                                    const last = propSchema.enum[propSchema.enum.length - 1];
+                                    const initial = propSchema.enum.slice(0, -1);
+                                    enumString += initial.join(', ') + `, or ${last}.`;
+                                }
+                                description += ` ${enumString}`;
+                            }
+
+                            const comment = showComment && description ? `      // ${isRequired} ${description}` : '';
+
+                            let line = `${childIndent}"${key}": ${valueString}`;
+                            
+                            if (!isLast) {
+                                line += ',';
+                            }
+                            
+                            if (comment) {
+                                line += comment;
+                            }
+                            
+                            return line;
+                        });
+
+                        return `{\n${lines.join('\n')}\n${indent}}`;
+
+                    case 'array':
+                        if (currentSchema.items) {
+                            const itemExample = _generate(currentSchema.items, indentLevel + 1, visitedRefs);
+                            return `[\n${childIndent}${itemExample}\n${indent}]`;
+                        }
+                        return '[]';
+                    
+                    default:
+                        return getPrimitiveExample(currentSchema);
+                }
+            }
+            
+            return _generate(schema, 0);
+        }
+
+        function generateRichExampleWithComments(schema, swaggerJson, commentMode = 'all', searchTerm = '', highlightClass = '') {
+            // Helper for primitive value highlighting
+            function getPrimitiveExampleHtml(s) {
+                if (s.enum && s.enum.length > 0) return `<span class="text-green-400">${JSON.stringify(s.enum[0])}</span>`;
+                if (s.format === 'date' || s.format === 'date-time') return `<span class="text-green-400">"2025-09-12"</span>`;
+                switch (s.type) {
+                    case 'string': return `<span class="text-green-400">"string"</span>`;
+                    case 'integer': case 'number': return `<span class="text-blue-400">0</span>`;
+                    case 'boolean': return `<span class="text-purple-400">true</span>`;
+                    default: return '{}';
+                }
+            }
+
+            // Main recursive function to build the formatted string
+            function _generate(currentSchema, indentLevel, visitedRefs = new Set()) {
+                if (!currentSchema) return '{}';
+
+                // Handle schema references
+                if (currentSchema.$ref) {
+                    if (visitedRefs.has(currentSchema.$ref)) return '"/* Circular Reference */"';
+                    visitedRefs.add(currentSchema.$ref);
+                    const resolved = resolveRef(currentSchema.$ref, swaggerJson);
+                    const result = _generate(resolved, indentLevel, visitedRefs);
+                    visitedRefs.delete(currentSchema.$ref);
+                    return result;
+                }
+                
+                // Utility to decode HTML entities from descriptions
+                const decodeHtmlEntities = (text) => {
+                    if (!text || typeof document === 'undefined') return text;
+                    const textArea = document.createElement('textarea');
+                    textArea.innerHTML = text;
+                    return textArea.value;
+                };
+
+                const indent = '  '.repeat(indentLevel);
+                const childIndent = '  '.repeat(indentLevel + 1);
+                const schemaType = currentSchema.type || (currentSchema.properties ? 'object' : undefined);
+
+                switch (schemaType) {
+                    case 'object':
+                        const properties = currentSchema.properties;
+                        if (!properties || Object.keys(properties).length === 0) return '{}';
+
+                        const requiredFields = new Set(currentSchema.required || []);
+                        const keys = Object.keys(properties);
+
+                        const lines = keys.map((key, index) => {
+                            const propSchema = properties[key];
+                            const propType = propSchema.type || (propSchema.properties ? 'object' : 'object');
+                            const isLast = index === keys.length - 1;
+                            
+                            const valueHtml = _generate(propSchema, indentLevel + 1, visitedRefs);
+                            let description = propSchema.description ? decodeHtmlEntities(propSchema.description).replace(/\s+/g, ' ').trim() : '';
+
+                            if (propSchema.enum && Array.isArray(propSchema.enum) && propSchema.enum.length > 0) {
+                                let enumString = "Can be ";
+                                if (propSchema.enum.length === 1) {
+                                    enumString += `${propSchema.enum[0]}.`;
+                                } else if (propSchema.enum.length === 2) {
+                                    enumString += `${propSchema.enum.join(' or ')}.`;
+                                } else {
+                                    const last = propSchema.enum[propSchema.enum.length - 1];
+                                    const initial = propSchema.enum.slice(0, -1);
+                                    enumString += initial.join(', ') + `, or ${last}.`;
+                                }
+                                description += ` ${enumString}`;
+                            }
+
+                            const isHighlighted = searchTerm && (key.toLowerCase().includes(searchTerm) || (description && description.toLowerCase().includes(searchTerm)));
+                            
+                            let keyHtml = `<span class="text-cyan-400">"${key}"</span>`;
+                            if (isHighlighted) {
+                                keyHtml = `<span class="${highlightClass}">${keyHtml}</span>`;
+                            }
+
+                            let showComment = false;
+                            if (commentMode === 'all') {
+                                showComment = true;
+                            } else if (commentMode === 'primitive' && propType !== 'object' && propType !== 'array') {
+                                showComment = true;
+                            }
+
+                            const isRequired = requiredFields.has(key) ? '(required)' : '(optional)';
+                            const comment = showComment && description ? `<span class="text-gray-500 code-comment">      // ${isRequired} ${description}</span>` : '';
+
+                            let line = `${childIndent}${keyHtml}: ${valueHtml}`;
+                            
+                            if (!isLast) {
+                                line += ',';
+                            }
+
+                            if (comment) {
+                                line += comment;
+                            }
+                            
+                            return line;
+                        });
+
+                        return `{\n${lines.join('\n')}\n${indent}}`;
+
+                    case 'array':
+                        if (currentSchema.items) {
+                            const itemExample = _generate(currentSchema.items, indentLevel + 1, visitedRefs);
+                            return `[\n${childIndent}${itemExample}\n${indent}]`;
+                        }
+                        return '[]';
+                    
+                    default:
+                        return getPrimitiveExampleHtml(currentSchema);
+                }
+            }
+            return _generate(schema, 0);
+        }
+
         function generateExampleFromSchema(schema, swaggerJson, visited = new Set()) {
-            if (!schema) return null;
+            if (!schema) return {};
             if (schema.$ref) {
                 if (visited.has(schema.$ref)) return { /* Circular reference */ };
                 visited.add(schema.$ref);
@@ -704,39 +1186,67 @@
                 case 'boolean':
                     return true;
                 default:
-                    if (schema.properties) { // Handle objects without explicit type
+                    if (schema.properties) {
                         const defaultObj = {};
                          for (const key in schema.properties) {
                             defaultObj[key] = generateExampleFromSchema(schema.properties[key], swaggerJson, visited);
                         }
                         return defaultObj;
                     }
-                    return null;
+                    return {};
             }
         }
         
-        function syntaxHighlight(json) {
-            if (json === null) return '<span class="text-gray-400">null</span>';
-            if (typeof json != 'string') {
-                json = JSON.stringify(json, undefined, 2);
+       function syntaxHighlight(jsonOrString, searchTerm = '', highlightClass = '') {
+            if (jsonOrString === null) return '<span class="text-gray-400">null</span>';
+            
+            let text;
+            if (typeof jsonOrString != 'string') {
+                text = JSON.stringify(jsonOrString, undefined, 2);
+            } else {
+                text = jsonOrString;
             }
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-                let cls = 'text-blue-400'; // number
-                if (/^"/.test(match)) {
-                    if (/:$/.test(match)) {
-                        cls = 'text-cyan-400'; // key
-                    } else {
-                        cls = 'text-green-400'; // string
-                    }
-                } else if (/true|false/.test(match)) {
-                    cls = 'text-purple-400'; // boolean
-                } else if (/null/.test(match)) {
-                    cls = 'text-gray-400'; // null
+
+            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            return text.split('\n').map(line => {
+                const commentIndex = line.indexOf('//');
+                let codePart = line;
+                let commentPart = '';
+
+                if (commentIndex !== -1) {
+                    codePart = line.substring(0, commentIndex);
+                    commentPart = line.substring(commentIndex);
                 }
-                return `<span class="${cls}">${match}</span>`;
-            });
+
+                const codeRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
+                
+                const highlightedCode = codePart.replace(codeRegex, function (match) {
+                    let cls = 'text-blue-400';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'text-cyan-400';
+                            const key = match.slice(1, -2);
+                            if (searchTerm && highlightClass && (key.toLowerCase().includes(searchTerm) || (commentPart && commentPart.toLowerCase().includes(searchTerm)))) {
+                                return `<span class="${highlightClass}"><span class="${cls}">${match}</span></span>`;
+                            }
+                        } else {
+                            cls = 'text-green-400';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'text-purple-400';
+                    } else if (/null/.test(match)) {
+                        cls = 'text-gray-400';
+                    }
+                    return `<span class="${cls}">${match}</span>`;
+                });
+                
+                const highlightedComment = commentPart ? `<span class="text-gray-500 code-comment">${commentPart}</span>` : '';
+
+                return highlightedCode + highlightedComment;
+            }).join('\n');
         }
+
 
         function applyMethodFilterToCard(card, filter) {
             let visibleCount = 0;
@@ -767,7 +1277,6 @@
                         details.classList.toggle('expanded');
                         icon.classList.toggle('rotate-180');
 
-                        // If the endpoint is now hidden (was just collapsed), reset its children
                         if (!details.classList.contains('expanded')) {
                             details.querySelectorAll('details[open]').forEach(detailElement => {
                                 detailElement.removeAttribute('open');
@@ -896,7 +1405,7 @@
             if (currentSortState === 'original') {
                 sortAZButton.disabled = false;
                 resetSortButton.disabled = true;
-            } else { // 'az'
+            } else {
                 sortAZButton.disabled = true;
                 resetSortButton.disabled = false;
             }
@@ -936,6 +1445,40 @@
             triggerSearchAndRender();
         });
         
+        function schemaHasProperty(schema, propName, swaggerJson, visited = new Set()) {
+            if (!schema) return false;
+
+            if (schema.$ref) {
+                if (visited.has(schema.$ref)) return false; // Avoid circular loops
+                visited.add(schema.$ref);
+                const resolvedSchema = resolveRef(schema.$ref, swaggerJson);
+                const result = schemaHasProperty(resolvedSchema, propName, swaggerJson, visited);
+                visited.delete(schema.$ref);
+                return result;
+            }
+
+            if (schema.properties) {
+                for (const key in schema.properties) {
+                    const propSchema = schema.properties[key];
+                    if (key.toLowerCase().includes(propName)) {
+                        return true;
+                    }
+                    if (propSchema.description && propSchema.description.toLowerCase().includes(propName)) {
+                        return true;
+                    }
+                    if (schemaHasProperty(propSchema, propName, swaggerJson, visited)) {
+                        return true;
+                    }
+                }
+            }
+
+            if (schema.items) {
+                return schemaHasProperty(schema.items, propName, swaggerJson, visited);
+            }
+
+            return false;
+        }
+
         function triggerSearchAndRender() {
             const expansionStates = {};
             document.querySelectorAll('.service-card').forEach(card => {
@@ -943,6 +1486,9 @@
             });
 
             const searchTerm = searchInput.value.toLowerCase().trim();
+            const paramSearchTerm = paramSearchInput.value.toLowerCase().trim();
+            const bodySearchTerm = bodySearchInput.value.toLowerCase().trim();
+            const responseSearchTerm = responseSearchInput.value.toLowerCase().trim();
             const servicesToProcess = allServiceDetails;
 
             const filteredServices = JSON.parse(JSON.stringify(servicesToProcess)).map(detail => {
@@ -951,9 +1497,32 @@
                     for (const path in detail.swaggerJson.paths) {
                         for (const method in detail.swaggerJson.paths[path]) {
                             const endpoint = detail.swaggerJson.paths[path][method];
+                            
                             const summary = (endpoint.summary || '').toLowerCase();
                             const pathString = path.toLowerCase();
-                            if (pathString.includes(searchTerm) || summary.includes(searchTerm)) {
+                            const pathOrSummaryMatch = searchTerm === '' || pathString.includes(searchTerm) || summary.includes(searchTerm);
+
+                            let paramMatch = paramSearchTerm === '';
+                            if (!paramMatch && endpoint.parameters) {
+                                paramMatch = endpoint.parameters.some(p => p.in !== 'body' && p.name.toLowerCase().includes(paramSearchTerm));
+                            }
+                            
+                            let bodyMatch = bodySearchTerm === '';
+                            if(!bodyMatch && endpoint.parameters) {
+                                const bodyParam = endpoint.parameters.find(p => p.in === 'body');
+                                if (bodyParam && bodyParam.schema) {
+                                    bodyMatch = schemaHasProperty(bodyParam.schema, bodySearchTerm, detail.swaggerJson);
+                                }
+                            }
+
+                            let responseMatch = responseSearchTerm === '';
+                            if (!responseMatch && endpoint.responses) {
+                                responseMatch = Object.values(endpoint.responses).some(resp => 
+                                    resp.schema && schemaHasProperty(resp.schema, responseSearchTerm, detail.swaggerJson)
+                                );
+                            }
+
+                            if (pathOrSummaryMatch && paramMatch && bodyMatch && responseMatch) {
                                 if (!filteredPaths[path]) filteredPaths[path] = {};
                                 filteredPaths[path][method] = endpoint;
                             }
@@ -980,15 +1549,11 @@
                 }
             };
 
-            // Update main toggle
             applyClasses(simpleViewBtn, !detailed);
             applyClasses(detailedViewBtn, detailed);
-
-             // Update sticky toggle
             applyClasses(stickySimpleViewBtn, !detailed);
             applyClasses(stickyDetailedViewBtn, detailed);
             
-            // Move Indicator
             if(document.getElementById('view-toggle-indicator')) {
                 document.getElementById('view-toggle-indicator').style.transform = transformValue;
             }
@@ -996,14 +1561,13 @@
                 document.getElementById('sticky-view-toggle-indicator').style.transform = transformValue;
             }
 
-
             if (!preventRender && document.body.contains(searchContainer) && !searchContainer.classList.contains('hidden')) { 
                  triggerSearchAndRender();
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-             setView(isDetailedView, true); // Set initial state on load, prevent re-render
+             setView(isDetailedView, true);
         });
 
 
@@ -1012,37 +1576,104 @@
         stickySimpleViewBtn.addEventListener('click', () => setView(false));
         stickyDetailedViewBtn.addEventListener('click', () => setView(true));
 
+        function handleSearchInput() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const paramSearchTerm = paramSearchInput.value.toLowerCase().trim();
+            const bodySearchTerm = bodySearchInput.value.toLowerCase().trim();
+            const responseSearchTerm = responseSearchInput.value.toLowerCase().trim();
+            
+            clearSearchInputBtn.classList.toggle('hidden', searchTerm.length === 0);
+            stickyClearSearchInputBtn.classList.toggle('hidden', searchTerm.length === 0);
+            clearParamSearchInputBtn.classList.toggle('hidden', paramSearchTerm.length === 0);
+            stickyClearParamSearchInputBtn.classList.toggle('hidden', paramSearchTerm.length === 0);
+            clearBodySearchInputBtn.classList.toggle('hidden', bodySearchTerm.length === 0);
+            stickyClearBodySearchInputBtn.classList.toggle('hidden', bodySearchTerm.length === 0);
+            clearResponseSearchInputBtn.classList.toggle('hidden', responseSearchTerm.length === 0);
+            stickyClearResponseSearchInputBtn.classList.toggle('hidden', responseSearchTerm.length === 0);
 
-        // Sync search inputs
+            triggerSearchAndRender();
+        }
+
         stickySearchInput.addEventListener('input', () => {
             searchInput.value = stickySearchInput.value;
-            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+            handleSearchInput();
         });
-
         searchInput.addEventListener('input', () => {
             stickySearchInput.value = searchInput.value;
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            clearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
-            triggerSearchAndRender();
+            handleSearchInput();
+        });
+        stickyParamSearchInput.addEventListener('input', () => {
+            paramSearchInput.value = stickyParamSearchInput.value;
+            handleSearchInput();
+        });
+        paramSearchInput.addEventListener('input', () => {
+            stickyParamSearchInput.value = paramSearchInput.value;
+            handleSearchInput();
+        });
+        stickyBodySearchInput.addEventListener('input', () => {
+            bodySearchInput.value = stickyBodySearchInput.value;
+            handleSearchInput();
+        });
+        bodySearchInput.addEventListener('input', () => {
+            stickyBodySearchInput.value = bodySearchInput.value;
+            handleSearchInput();
+        });
+        stickyResponseSearchInput.addEventListener('input', () => {
+            responseSearchInput.value = stickyResponseSearchInput.value;
+            handleSearchInput();
+        });
+        responseSearchInput.addEventListener('input', () => {
+            stickyResponseSearchInput.value = responseSearchInput.value;
+            handleSearchInput();
         });
 
-        clearSearchButton.addEventListener('click', () => {
+
+        function clearMainSearch() {
             searchInput.value = '';
-            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-            activeMethodFilters = {}; // Also reset method filters
-            
+            stickySearchInput.value = '';
+            handleSearchInput(); 
             if (isDetailedView) {
-                setView(false); 
-            } else {
-                const expansionStates = {};
-                document.querySelectorAll('.service-card').forEach(card => {
-                    expansionStates[card.id] = card.querySelector('.collapsible-content').classList.contains('expanded');
-                });
-                renderServices(allServiceDetails, expansionStates);
+                setView(false);
             }
-        });
+        }
 
-        let isStickyHeaderSetup = false;
+        function clearParamSearch() {
+            paramSearchInput.value = '';
+            stickyParamSearchInput.value = '';
+            handleSearchInput();
+            if (isDetailedView) {
+                setView(false);
+            }
+        }
+        
+        function clearBodySearch() {
+             bodySearchInput.value = '';
+            stickyBodySearchInput.value = '';
+            handleSearchInput();
+            if (isDetailedView) {
+                setView(false);
+            }
+        }
+
+        function clearResponseSearch() {
+             responseSearchInput.value = '';
+            stickyResponseSearchInput.value = '';
+            handleSearchInput();
+            if (isDetailedView) {
+                setView(false);
+            }
+        }
+
+        clearSearchInputBtn.addEventListener('click', clearMainSearch);
+        stickyClearSearchInputBtn.addEventListener('click', clearMainSearch);
+        clearParamSearchInputBtn.addEventListener('click', clearParamSearch);
+        stickyClearParamSearchInputBtn.addEventListener('click', clearParamSearch);
+        clearBodySearchInputBtn.addEventListener('click', clearBodySearch);
+        stickyClearBodySearchInputBtn.addEventListener('click', clearBodySearch);
+        clearResponseSearchInputBtn.addEventListener('click', clearResponseSearch);
+        stickyClearResponseSearchInputBtn.addEventListener('click', clearResponseSearch);
+
+
         window.onscroll = () => {
             toTopButton.classList.toggle('hidden', document.body.scrollTop <= 100 && document.documentElement.scrollTop <= 100);
 
