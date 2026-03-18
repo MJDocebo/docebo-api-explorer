@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- This file was created with the assistance of an Google Gemini 2.5 Pro AI model. -->
+<!-- This file was created with the assistance of an Google Gemini 3.1 Pro AI model. -->
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -508,10 +508,15 @@
                         </svg>
                     </button>
                 </div>
-                <p class="text-gray-600 mb-6 pl-14 dark:text-gray-400">
-                    Enter the base URL for your Docebo instance to discover
-                    available API services and their endpoints.
-                </p>
+                <div class="mb-6 pl-14">
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Enter the base URL for your Docebo instance to discover
+                        available API services and their endpoints.
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                        This site only accesses publicly available API documentation. No authentication tokens are required, used, stored, or shared by this application.
+                    </p>
+                </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 mb-8">
                     <input
@@ -904,11 +909,11 @@
                                 <input
                                     id="responseIncludeDescCheck"
                                     type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
+                                    class="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
                                 />
                                 <label
                                     for="responseIncludeDescCheck"
-                                    class="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                                    class="ml-1.5 block text-xs text-gray-600 dark:text-gray-400"
                                     >Also search description</label
                                 >
                             </div>
@@ -1398,13 +1403,13 @@
             const setTheme = (theme) => {
                 if (theme === "dark") {
                     document.documentElement.classList.add("dark");
-                    themeToggleLightIcon.classList.remove("hidden");
-                    themeToggleDarkIcon.classList.add("hidden");
+                    themeToggleLightIcon?.classList.remove("hidden");
+                    themeToggleDarkIcon?.classList.add("hidden");
                     localStorage.setItem("color-theme", "dark");
                 } else {
                     document.documentElement.classList.remove("dark");
-                    themeToggleDarkIcon.classList.remove("hidden");
-                    themeToggleLightIcon.classList.add("hidden");
+                    themeToggleDarkIcon?.classList.remove("hidden");
+                    themeToggleLightIcon?.classList.add("hidden");
                     localStorage.setItem("color-theme", "light");
                 }
             };
@@ -1419,7 +1424,7 @@
                 setTheme("light");
             }
 
-            themeToggleBtn.addEventListener("click", () => {
+            themeToggleBtn?.addEventListener("click", () => {
                 const isDarkMode =
                     document.documentElement.classList.contains("dark");
                 setTheme(isDarkMode ? "light" : "dark");
@@ -1551,99 +1556,155 @@
             let activeMethodFilters = {};
             let currentSortState = "original";
 
-            closeWarningBtn.addEventListener("click", () => {
+            closeWarningBtn?.addEventListener("click", () => {
                 sessionStorage.setItem("warningClosed", "true");
-                detailedViewWarning.classList.add("hidden");
+                detailedViewWarning?.classList.add("hidden");
             });
 
-            helpButton.addEventListener("click", () =>
-                helpModal.classList.remove("hidden")
+            helpButton?.addEventListener("click", () =>
+                helpModal?.classList.remove("hidden")
             );
-            closeHelpModal.addEventListener("click", () =>
-                helpModal.classList.add("hidden")
+            closeHelpModal?.addEventListener("click", () =>
+                helpModal?.classList.add("hidden")
             );
-            helpModal.addEventListener("click", (e) => {
+            helpModal?.addEventListener("click", (e) => {
                 if (e.target === helpModal) {
-                    helpModal.classList.add("hidden");
+                    helpModal?.classList.add("hidden");
                 }
             });
 
-            fetchButton.addEventListener("click", async () => {
+            fetchButton?.addEventListener("click", async () => {
                 if (isDetailedView) {
                     setView(false, true);
                 }
 
-                const baseUrl = baseUrlInput.value.trim();
+                const baseUrl = baseUrlInput?.value.trim();
                 if (!baseUrl) {
                     showError("Please enter a valid Docebo base URL.");
                     return;
                 }
 
-                resultsDiv.innerHTML =
-                    '<div class="flex justify-center p-10"><div class="spinner"></div></div>';
-                navContainer.classList.add("hidden");
-                searchContainer.classList.add("hidden");
-                expandCollapseContainer.classList.add("hidden");
-                controlsContainer.classList.add("hidden");
-                detailedViewWarning.classList.add("hidden");
-                stickyHeader.classList.add("hidden", "-translate-y-full");
+                if (resultsDiv) {
+                    resultsDiv.innerHTML =
+                        '<div class="flex flex-col items-center justify-center p-10 space-y-4"><div class="spinner"></div><div id="loading-status" class="text-sm text-gray-500 dark:text-gray-400 font-mono transition-opacity duration-300">Initializing connection...</div></div>';
+                }
+                navContainer?.classList.add("hidden");
+                searchContainer?.classList.add("hidden");
+                expandCollapseContainer?.classList.add("hidden");
+                controlsContainer?.classList.add("hidden");
+                detailedViewWarning?.classList.add("hidden");
+                stickyHeader?.classList.add("hidden", "-translate-y-full");
 
                 // Manually clear inputs to prevent re-render that hides the spinner
-                searchInput.value = "";
-                paramSearchInput.value = "";
-                bodySearchInput.value = "";
-                responseSearchInput.value = "";
-                stickySearchInput.value = "";
-                stickyParamSearchInput.value = "";
-                stickyBodySearchInput.value = "";
-                stickyResponseSearchInput.value = "";
-                pathIncludeDescCheck.checked = false;
-                paramIncludeDescCheck.checked = false;
-                bodyIncludeDescCheck.checked = false;
-                responseIncludeDescCheck.checked = false;
-                stickyPathIncludeDescCheck.checked = false;
-                stickyParamIncludeDescCheck.checked = false;
-                stickyBodyIncludeDescCheck.checked = false;
-                stickyResponseIncludeDescCheck.checked = false;
+                if(searchInput) searchInput.value = "";
+                if(paramSearchInput) paramSearchInput.value = "";
+                if(bodySearchInput) bodySearchInput.value = "";
+                if(responseSearchInput) responseSearchInput.value = "";
+                if(stickySearchInput) stickySearchInput.value = "";
+                if(stickyParamSearchInput) stickyParamSearchInput.value = "";
+                if(stickyBodySearchInput) stickyBodySearchInput.value = "";
+                if(stickyResponseSearchInput) stickyResponseSearchInput.value = "";
+                
+                if(pathIncludeDescCheck) pathIncludeDescCheck.checked = false;
+                if(paramIncludeDescCheck) paramIncludeDescCheck.checked = false;
+                if(bodyIncludeDescCheck) bodyIncludeDescCheck.checked = false;
+                if(responseIncludeDescCheck) responseIncludeDescCheck.checked = false;
+                if(stickyPathIncludeDescCheck) stickyPathIncludeDescCheck.checked = false;
+                if(stickyParamIncludeDescCheck) stickyParamIncludeDescCheck.checked = false;
+                if(stickyBodyIncludeDescCheck) stickyBodyIncludeDescCheck.checked = false;
+                if(stickyResponseIncludeDescCheck) stickyResponseIncludeDescCheck.checked = false;
+                
                 updateClearAllButtonState();
-                clearSearchInputBtn.classList.add("hidden");
-                stickyClearSearchInputBtn.classList.add("hidden");
-                clearParamSearchInputBtn.classList.add("hidden");
-                stickyClearParamSearchInputBtn.classList.add("hidden");
-                clearBodySearchInputBtn.classList.add("hidden");
-                stickyClearBodySearchInputBtn.classList.add("hidden");
-                clearResponseSearchInputBtn.classList.add("hidden");
-                stickyClearResponseSearchInputBtn.classList.add("hidden");
+                
+                clearSearchInputBtn?.classList.add("hidden");
+                stickyClearSearchInputBtn?.classList.add("hidden");
+                clearParamSearchInputBtn?.classList.add("hidden");
+                stickyClearParamSearchInputBtn?.classList.add("hidden");
+                clearBodySearchInputBtn?.classList.add("hidden");
+                stickyClearBodySearchInputBtn?.classList.add("hidden");
+                clearResponseSearchInputBtn?.classList.add("hidden");
+                stickyClearResponseSearchInputBtn?.classList.add("hidden");
 
-                navLinksContainer.innerHTML = "";
+                if (navLinksContainer) navLinksContainer.innerHTML = "";
                 activeMethodFilters = {};
-                fetchButton.disabled = true;
-                fetchButton.classList.add("opacity-50", "cursor-not-allowed");
+                if (fetchButton) {
+                    fetchButton.disabled = true;
+                    fetchButton.classList.add("opacity-50", "cursor-not-allowed");
+                }
                 updateResetButtonState();
                 hideError();
 
-                const corsProxy = "https://corsproxy.io/?";
-                const servicesUrl = `${corsProxy}${encodeURIComponent(
-                    `https://${baseUrl}/manage/v1/site/microservices`
-                )}`;
+                // Define proxies to cycle through
+                const proxies = [
+                    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                    (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                    (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+                ];
+                
+                let workingProxyFn = null;
+
+                // Define a helper to automatically fallback to other proxies if one fails
+                async function fetchWithProxy(targetUrl) {
+                    let lastError;
+                    const statusEl = document.getElementById('loading-status');
+
+                    // 1. If we found a working proxy in a previous request, try it first to save time
+                    if (workingProxyFn) {
+                        try {
+                            const response = await fetch(workingProxyFn(targetUrl));
+                            if (response.ok) return response;
+                            // If the known proxy suddenly fails, clear it to test the others again
+                            workingProxyFn = null;
+                        } catch (e) {
+                            workingProxyFn = null;
+                        }
+                    }
+
+                    // 2. Test proxies from the list
+                    for (const proxyFn of proxies) {
+                        try {
+                            const proxyUrl = proxyFn(targetUrl);
+                            const hostname = new URL(proxyUrl).hostname;
+                            
+                            if (statusEl && !workingProxyFn) {
+                                statusEl.innerHTML = `Testing proxy: <span class="text-blue-500 dark:text-blue-400 font-semibold">${hostname}</span>...`;
+                            }
+                            
+                            const response = await fetch(proxyUrl);
+                            if (response.ok) {
+                                if (!workingProxyFn) { 
+                                    // Only log once when a new working proxy is discovered
+                                    console.log(`Discovered working proxy: ${hostname}`);
+                                    if (statusEl) {
+                                        statusEl.innerHTML = `Connected via <span class="text-green-500 dark:text-green-400 font-semibold">${hostname}</span>. Downloading schemas...`;
+                                    }
+                                }
+                                workingProxyFn = proxyFn; // Save it for subsequent requests
+                                return response;
+                            }
+                            lastError = new Error(`HTTP Error: ${response.status}`);
+                        } catch (error) {
+                            lastError = error; // Network errors caught here
+                        }
+                    }
+                    throw new Error(`All CORS proxies failed. Last error: ${lastError.message}`);
+                }
+
+                const targetServicesUrl = `https://${baseUrl}/manage/v1/site/microservices`;
 
                 try {
-                    const response = await fetch(servicesUrl);
-                    if (!response.ok)
-                        throw new Error(
-                            `Failed to fetch services list. Status: ${response.status}`
-                        );
+                    const response = await fetchWithProxy(targetServicesUrl);
                     const servicesData = await response.json();
 
                     if (!servicesData.data || servicesData.data.length === 0) {
                         showError("No microservices found at this URL.");
-                        resultsDiv.innerHTML = "";
+                        if (resultsDiv) resultsDiv.innerHTML = "";
                         return;
                     }
 
                     const swaggerPromises = servicesData.data.map((service) =>
-                        fetch(`${corsProxy}${encodeURIComponent(service.url)}`)
-                            .then((res) => (res.ok ? res.json() : null))
+                        fetchWithProxy(service.url)
+                            .then((res) => res.json())
                             .then((swaggerJson) => ({ service, swaggerJson }))
                             .catch((err) => {
                                 console.error(
@@ -1662,13 +1723,15 @@
                 } catch (error) {
                     console.error("An error occurred:", error);
                     showError(error.message || "An unknown error occurred.");
-                    resultsDiv.innerHTML = "";
+                    if (resultsDiv) resultsDiv.innerHTML = "";
                 } finally {
-                    fetchButton.disabled = false;
-                    fetchButton.classList.remove(
-                        "opacity-50",
-                        "cursor-not-allowed"
-                    );
+                    if (fetchButton) {
+                        fetchButton.disabled = false;
+                        fetchButton.classList.remove(
+                            "opacity-50",
+                            "cursor-not-allowed"
+                        );
+                    }
                 }
             });
 
@@ -1676,21 +1739,22 @@
                 serviceDetailsToRender,
                 expansionStates = {}
             ) {
-                resultsDiv.innerHTML = "";
-                navLinksContainer.innerHTML = "";
+                if (resultsDiv) resultsDiv.innerHTML = "";
+                if (navLinksContainer) navLinksContainer.innerHTML = "";
 
-                const paramSearchTerm = paramSearchInput.value
+                const paramSearchTerm = paramSearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeParamDesc = paramIncludeDescCheck.checked;
-                const bodySearchTerm = bodySearchInput.value
+                    .trim() || "";
+                const includeParamDesc = paramIncludeDescCheck?.checked || false;
+                const bodySearchTerm = bodySearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeBodyDesc = bodyIncludeDescCheck.checked;
-                const responseSearchTerm = responseSearchInput.value
+                    .trim() || "";
+                const includeBodyDesc = bodyIncludeDescCheck?.checked || false;
+                const responseSearchTerm = responseSearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeResponseDesc = responseIncludeDescCheck.checked;
+                    .trim() || "";
+                const includeResponseDesc = responseIncludeDescCheck?.checked || false;
+                
                 const hasAnyServices = allServiceDetails.some(
                     (d) =>
                         d.swaggerJson &&
@@ -1703,36 +1767,40 @@
                 );
 
                 if (hasAnyServices) {
-                    controlsContainer.classList.remove("hidden");
-                    controlsContainer.classList.add("flex");
+                    controlsContainer?.classList.remove("hidden");
+                    controlsContainer?.classList.add("flex");
                     if (sessionStorage.getItem("warningClosed") !== "true") {
-                        detailedViewWarning.classList.remove("hidden");
+                        detailedViewWarning?.classList.remove("hidden");
                     }
-                    navContainer.classList.remove("hidden");
-                    searchContainer.classList.remove("hidden");
-                    stickyHeader.classList.remove("hidden");
+                    navContainer?.classList.remove("hidden");
+                    searchContainer?.classList.remove("hidden");
+                    stickyHeader?.classList.remove("hidden");
 
                     validServices.forEach(({ service }) => {
                         const serviceId = `service-${service.app}`;
-                        navLinksContainer.innerHTML += `<a href="#${serviceId}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition capitalize dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">${service.app}</a>`;
+                        if (navLinksContainer) {
+                            navLinksContainer.innerHTML += `<a href="#${serviceId}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition capitalize dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">${service.app}</a>`;
+                        }
                     });
                 } else {
-                    stickyHeader.classList.add("hidden");
-                    controlsContainer.classList.add("hidden");
-                    controlsContainer.classList.remove("flex");
-                    searchContainer.classList.add("hidden");
-                    detailedViewWarning.classList.add("hidden");
+                    stickyHeader?.classList.add("hidden");
+                    controlsContainer?.classList.add("hidden");
+                    controlsContainer?.classList.remove("flex");
+                    searchContainer?.classList.add("hidden");
+                    detailedViewWarning?.classList.add("hidden");
                 }
 
                 if (validServices.length === 0) {
                     if (
-                        searchInput.value ||
-                        paramSearchInput.value ||
-                        bodySearchInput.value ||
-                        responseSearchInput.value
+                        searchInput?.value ||
+                        paramSearchInput?.value ||
+                        bodySearchInput?.value ||
+                        responseSearchInput?.value
                     ) {
-                        resultsDiv.innerHTML =
-                            '<p class="text-center text-gray-600 dark:text-gray-400">No API endpoints match your search criteria.</p>';
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML =
+                                '<p class="text-center text-gray-600 dark:text-gray-400">No API endpoints match your search criteria.</p>';
+                        }
                     }
                     updateExpandCollapseButtonsState();
                     updateTotalCount();
@@ -1906,7 +1974,7 @@
                             <div class="endpoints-list mt-2">${endpointsHtml}</div>
                         </div>
                     </div>`;
-                    resultsDiv.appendChild(card);
+                    if (resultsDiv) resultsDiv.appendChild(card);
                 });
 
                 addMethodFiltering();
@@ -3015,18 +3083,17 @@
                 const allCards = document.querySelectorAll(".service-card");
 
                 if (allCards.length === 0) {
-                    expandCollapseContainer.classList.add("hidden");
+                    expandCollapseContainer?.classList.add("hidden");
                     return;
                 }
 
-                expandCollapseContainer.classList.remove("hidden");
+                expandCollapseContainer?.classList.remove("hidden");
                 const collapsedCards = document.querySelectorAll(
                     ".collapsible-content:not(.expanded)"
                 );
 
-                expandAllButton.disabled = collapsedCards.length === 0;
-                collapseAllButton.disabled =
-                    collapsedCards.length === allCards.length;
+                if (expandAllButton) expandAllButton.disabled = collapsedCards.length === 0;
+                if (collapseAllButton) collapseAllButton.disabled = collapsedCards.length === allCards.length;
             }
 
             function addCollapseFunctionality() {
@@ -3062,7 +3129,7 @@
                 });
             }
 
-            expandAllButton.addEventListener("click", () => {
+            expandAllButton?.addEventListener("click", () => {
                 document.querySelectorAll(".service-card").forEach((card) => {
                     const content = card.querySelector(".collapsible-content");
                     const icon = card.querySelector(".collapse-icon");
@@ -3072,7 +3139,7 @@
                 updateExpandCollapseButtonsState();
             });
 
-            collapseAllButton.addEventListener("click", () => {
+            collapseAllButton?.addEventListener("click", () => {
                 document.querySelectorAll(".service-card").forEach((card) => {
                     const content = card.querySelector(".collapsible-content");
                     const icon = card.querySelector(".collapse-icon");
@@ -3154,28 +3221,30 @@
                 const totalCount = document.querySelectorAll(
                     ".endpoint-item:not(.hidden)"
                 ).length;
-                totalApiCountEl.textContent = `Showing ${totalCount} API Endpoint${
-                    totalCount !== 1 ? "s" : ""
-                }`;
+                if (totalApiCountEl) {
+                    totalApiCountEl.textContent = `Showing ${totalCount} API Endpoint${
+                        totalCount !== 1 ? "s" : ""
+                    }`;
+                }
             }
 
             function updateResetButtonState() {
                 const hasActiveFilters =
                     Object.keys(activeMethodFilters).length > 0;
-                resetFiltersButton.disabled = !hasActiveFilters;
+                if (resetFiltersButton) resetFiltersButton.disabled = !hasActiveFilters;
             }
 
             function updateSortButtonsState() {
                 if (currentSortState === "original") {
-                    sortAZButton.disabled = false;
-                    resetSortButton.disabled = true;
+                    if (sortAZButton) sortAZButton.disabled = false;
+                    if (resetSortButton) resetSortButton.disabled = true;
                 } else {
-                    sortAZButton.disabled = true;
-                    resetSortButton.disabled = false;
+                    if (sortAZButton) sortAZButton.disabled = true;
+                    if (resetSortButton) resetSortButton.disabled = false;
                 }
             }
 
-            resetFiltersButton.addEventListener("click", () => {
+            resetFiltersButton?.addEventListener("click", () => {
                 activeMethodFilters = {};
                 document.querySelectorAll(".service-card").forEach((card) => {
                     const controls = card.querySelector(
@@ -3212,7 +3281,7 @@
                 updateTotalCount();
             });
 
-            sortAZButton.addEventListener("click", () => {
+            sortAZButton?.addEventListener("click", () => {
                 allServiceDetails.sort((a, b) =>
                     a.service.app.localeCompare(b.service.app)
                 );
@@ -3221,7 +3290,7 @@
                 triggerSearchAndRender();
             });
 
-            resetSortButton.addEventListener("click", () => {
+            resetSortButton?.addEventListener("click", () => {
                 allServiceDetails = [...originalServiceDetails];
                 currentSortState = "original";
                 updateSortButtonsState();
@@ -3302,20 +3371,20 @@
                         .classList.contains("expanded");
                 });
 
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                const includePathDesc = pathIncludeDescCheck.checked;
-                const paramSearchTerm = paramSearchInput.value
+                const searchTerm = searchInput?.value.toLowerCase().trim() || "";
+                const includePathDesc = pathIncludeDescCheck?.checked || false;
+                const paramSearchTerm = paramSearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeParamDesc = paramIncludeDescCheck.checked;
-                const bodySearchTerm = bodySearchInput.value
+                    .trim() || "";
+                const includeParamDesc = paramIncludeDescCheck?.checked || false;
+                const bodySearchTerm = bodySearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeBodyDesc = bodyIncludeDescCheck.checked;
-                const responseSearchTerm = responseSearchInput.value
+                    .trim() || "";
+                const includeBodyDesc = bodyIncludeDescCheck?.checked || false;
+                const responseSearchTerm = responseSearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const includeResponseDesc = responseIncludeDescCheck.checked;
+                    .trim() || "";
+                const includeResponseDesc = responseIncludeDescCheck?.checked || false;
                 const servicesToProcess = allServiceDetails;
 
                 const filteredServices = JSON.parse(
@@ -3461,6 +3530,7 @@
 
                 if (
                     !preventRender &&
+                    searchContainer &&
                     document.body.contains(searchContainer) &&
                     !searchContainer.classList.contains("hidden")
                 ) {
@@ -3473,74 +3543,74 @@
                 updateClearAllButtonState();
                 if (toggleStickySearchBtn) {
                     toggleStickySearchBtn.addEventListener("click", () => {
-                        stickySearchArea.classList.toggle("expanded");
-                        toggleStickySearchIcon.classList.toggle("rotate-180");
+                        stickySearchArea?.classList.toggle("expanded");
+                        toggleStickySearchIcon?.classList.toggle("rotate-180");
                     });
                 }
             });
 
-            simpleViewBtn.addEventListener("click", () => setView(false));
-            detailedViewBtn.addEventListener("click", () => setView(true));
-            stickySimpleViewBtn.addEventListener("click", () => setView(false));
-            stickyDetailedViewBtn.addEventListener("click", () =>
+            simpleViewBtn?.addEventListener("click", () => setView(false));
+            detailedViewBtn?.addEventListener("click", () => setView(true));
+            stickySimpleViewBtn?.addEventListener("click", () => setView(false));
+            stickyDetailedViewBtn?.addEventListener("click", () =>
                 setView(true)
             );
 
             function updateClearAllButtonState() {
                 const hasValue =
-                    searchInput.value.trim() !== "" ||
-                    paramSearchInput.value.trim() !== "" ||
-                    bodySearchInput.value.trim() !== "" ||
-                    responseSearchInput.value.trim() !== "" ||
-                    pathIncludeDescCheck.checked ||
-                    paramIncludeDescCheck.checked ||
-                    bodyIncludeDescCheck.checked ||
-                    responseIncludeDescCheck.checked;
+                    (searchInput?.value.trim() !== "") ||
+                    (paramSearchInput?.value.trim() !== "") ||
+                    (bodySearchInput?.value.trim() !== "") ||
+                    (responseSearchInput?.value.trim() !== "") ||
+                    (pathIncludeDescCheck?.checked) ||
+                    (paramIncludeDescCheck?.checked) ||
+                    (bodyIncludeDescCheck?.checked) ||
+                    (responseIncludeDescCheck?.checked);
 
                 if (clearAllButton) clearAllButton.disabled = !hasValue;
             }
 
             function handleSearchInput() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                const paramSearchTerm = paramSearchInput.value
+                const searchTerm = searchInput?.value.toLowerCase().trim() || "";
+                const paramSearchTerm = paramSearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const bodySearchTerm = bodySearchInput.value
+                    .trim() || "";
+                const bodySearchTerm = bodySearchInput?.value
                     .toLowerCase()
-                    .trim();
-                const responseSearchTerm = responseSearchInput.value
+                    .trim() || "";
+                const responseSearchTerm = responseSearchInput?.value
                     .toLowerCase()
-                    .trim();
+                    .trim() || "";
 
-                clearSearchInputBtn.classList.toggle(
+                clearSearchInputBtn?.classList.toggle(
                     "hidden",
                     searchTerm.length === 0
                 );
-                stickyClearSearchInputBtn.classList.toggle(
+                stickyClearSearchInputBtn?.classList.toggle(
                     "hidden",
                     searchTerm.length === 0
                 );
-                clearParamSearchInputBtn.classList.toggle(
+                clearParamSearchInputBtn?.classList.toggle(
                     "hidden",
                     paramSearchTerm.length === 0
                 );
-                stickyClearParamSearchInputBtn.classList.toggle(
+                stickyClearParamSearchInputBtn?.classList.toggle(
                     "hidden",
                     paramSearchTerm.length === 0
                 );
-                clearBodySearchInputBtn.classList.toggle(
+                clearBodySearchInputBtn?.classList.toggle(
                     "hidden",
                     bodySearchTerm.length === 0
                 );
-                stickyClearBodySearchInputBtn.classList.toggle(
+                stickyClearBodySearchInputBtn?.classList.toggle(
                     "hidden",
                     bodySearchTerm.length === 0
                 );
-                clearResponseSearchInputBtn.classList.toggle(
+                clearResponseSearchInputBtn?.classList.toggle(
                     "hidden",
                     responseSearchTerm.length === 0
                 );
-                stickyClearResponseSearchInputBtn.classList.toggle(
+                stickyClearResponseSearchInputBtn?.classList.toggle(
                     "hidden",
                     responseSearchTerm.length === 0
                 );
@@ -3549,80 +3619,72 @@
                 triggerSearchAndRender();
             }
 
-            stickySearchInput.addEventListener("input", () => {
-                searchInput.value = stickySearchInput.value;
+            stickySearchInput?.addEventListener("input", () => {
+                if(searchInput) searchInput.value = stickySearchInput.value;
                 handleSearchInput();
             });
-            searchInput.addEventListener("input", () => {
-                stickySearchInput.value = searchInput.value;
+            searchInput?.addEventListener("input", () => {
+                if(stickySearchInput) stickySearchInput.value = searchInput.value;
                 handleSearchInput();
             });
-            stickyParamSearchInput.addEventListener("input", () => {
-                paramSearchInput.value = stickyParamSearchInput.value;
+            stickyParamSearchInput?.addEventListener("input", () => {
+                if(paramSearchInput) paramSearchInput.value = stickyParamSearchInput.value;
                 handleSearchInput();
             });
-            paramSearchInput.addEventListener("input", () => {
-                stickyParamSearchInput.value = paramSearchInput.value;
+            paramSearchInput?.addEventListener("input", () => {
+                if(stickyParamSearchInput) stickyParamSearchInput.value = paramSearchInput.value;
                 handleSearchInput();
             });
-            stickyBodySearchInput.addEventListener("input", () => {
-                bodySearchInput.value = stickyBodySearchInput.value;
+            stickyBodySearchInput?.addEventListener("input", () => {
+                if(bodySearchInput) bodySearchInput.value = stickyBodySearchInput.value;
                 handleSearchInput();
             });
-            bodySearchInput.addEventListener("input", () => {
-                stickyBodySearchInput.value = bodySearchInput.value;
+            bodySearchInput?.addEventListener("input", () => {
+                if(stickyBodySearchInput) stickyBodySearchInput.value = bodySearchInput.value;
                 handleSearchInput();
             });
-            stickyResponseSearchInput.addEventListener("input", () => {
-                responseSearchInput.value = stickyResponseSearchInput.value;
+            stickyResponseSearchInput?.addEventListener("input", () => {
+                if(responseSearchInput) responseSearchInput.value = stickyResponseSearchInput.value;
                 handleSearchInput();
             });
-            responseSearchInput.addEventListener("input", () => {
-                stickyResponseSearchInput.value = responseSearchInput.value;
-                handleSearchInput();
-            });
-
-            pathIncludeDescCheck.addEventListener("change", () => {
-                stickyPathIncludeDescCheck.checked =
-                    pathIncludeDescCheck.checked;
-                handleSearchInput();
-            });
-            stickyPathIncludeDescCheck.addEventListener("change", () => {
-                pathIncludeDescCheck.checked =
-                    stickyPathIncludeDescCheck.checked;
+            responseSearchInput?.addEventListener("input", () => {
+                if(stickyResponseSearchInput) stickyResponseSearchInput.value = responseSearchInput.value;
                 handleSearchInput();
             });
 
-            paramIncludeDescCheck.addEventListener("change", () => {
-                stickyParamIncludeDescCheck.checked =
-                    paramIncludeDescCheck.checked;
+            pathIncludeDescCheck?.addEventListener("change", () => {
+                if(stickyPathIncludeDescCheck) stickyPathIncludeDescCheck.checked = pathIncludeDescCheck.checked;
                 handleSearchInput();
             });
-            stickyParamIncludeDescCheck.addEventListener("change", () => {
-                paramIncludeDescCheck.checked =
-                    stickyParamIncludeDescCheck.checked;
-                handleSearchInput();
-            });
-
-            bodyIncludeDescCheck.addEventListener("change", () => {
-                stickyBodyIncludeDescCheck.checked =
-                    bodyIncludeDescCheck.checked;
-                handleSearchInput();
-            });
-            stickyBodyIncludeDescCheck.addEventListener("change", () => {
-                bodyIncludeDescCheck.checked =
-                    stickyBodyIncludeDescCheck.checked;
+            stickyPathIncludeDescCheck?.addEventListener("change", () => {
+                if(pathIncludeDescCheck) pathIncludeDescCheck.checked = stickyPathIncludeDescCheck.checked;
                 handleSearchInput();
             });
 
-            responseIncludeDescCheck.addEventListener("change", () => {
-                stickyResponseIncludeDescCheck.checked =
-                    responseIncludeDescCheck.checked;
+            paramIncludeDescCheck?.addEventListener("change", () => {
+                if(stickyParamIncludeDescCheck) stickyParamIncludeDescCheck.checked = paramIncludeDescCheck.checked;
                 handleSearchInput();
             });
-            stickyResponseIncludeDescCheck.addEventListener("change", () => {
-                responseIncludeDescCheck.checked =
-                    stickyResponseIncludeDescCheck.checked;
+            stickyParamIncludeDescCheck?.addEventListener("change", () => {
+                if(paramIncludeDescCheck) paramIncludeDescCheck.checked = stickyParamIncludeDescCheck.checked;
+                handleSearchInput();
+            });
+
+            bodyIncludeDescCheck?.addEventListener("change", () => {
+                if(stickyBodyIncludeDescCheck) stickyBodyIncludeDescCheck.checked = bodyIncludeDescCheck.checked;
+                handleSearchInput();
+            });
+            stickyBodyIncludeDescCheck?.addEventListener("change", () => {
+                if(bodyIncludeDescCheck) bodyIncludeDescCheck.checked = stickyBodyIncludeDescCheck.checked;
+                handleSearchInput();
+            });
+
+            responseIncludeDescCheck?.addEventListener("change", () => {
+                if(stickyResponseIncludeDescCheck) stickyResponseIncludeDescCheck.checked = responseIncludeDescCheck.checked;
+                handleSearchInput();
+            });
+            stickyResponseIncludeDescCheck?.addEventListener("change", () => {
+                if(responseIncludeDescCheck) responseIncludeDescCheck.checked = stickyResponseIncludeDescCheck.checked;
                 handleSearchInput();
             });
 
@@ -3657,41 +3719,41 @@
                     setView(false, true); // Reset to simple view, prevent re-render from here
                 }
                 // Clear main inputs
-                searchInput.value = "";
-                paramSearchInput.value = "";
-                bodySearchInput.value = "";
-                responseSearchInput.value = "";
+                if(searchInput) searchInput.value = "";
+                if(paramSearchInput) paramSearchInput.value = "";
+                if(bodySearchInput) bodySearchInput.value = "";
+                if(responseSearchInput) responseSearchInput.value = "";
 
                 // Clear sticky inputs
-                stickySearchInput.value = "";
-                stickyParamSearchInput.value = "";
-                stickyBodySearchInput.value = "";
-                stickyResponseSearchInput.value = "";
+                if(stickySearchInput) stickySearchInput.value = "";
+                if(stickyParamSearchInput) stickyParamSearchInput.value = "";
+                if(stickyBodySearchInput) stickyBodySearchInput.value = "";
+                if(stickyResponseSearchInput) stickyResponseSearchInput.value = "";
 
                 // Uncheck main checkboxes
-                pathIncludeDescCheck.checked = false;
-                paramIncludeDescCheck.checked = false;
-                bodyIncludeDescCheck.checked = false;
-                responseIncludeDescCheck.checked = false;
+                if(pathIncludeDescCheck) pathIncludeDescCheck.checked = false;
+                if(paramIncludeDescCheck) paramIncludeDescCheck.checked = false;
+                if(bodyIncludeDescCheck) bodyIncludeDescCheck.checked = false;
+                if(responseIncludeDescCheck) responseIncludeDescCheck.checked = false;
 
                 // Uncheck sticky checkboxes
-                stickyPathIncludeDescCheck.checked = false;
-                stickyParamIncludeDescCheck.checked = false;
-                stickyBodyIncludeDescCheck.checked = false;
-                stickyResponseIncludeDescCheck.checked = false;
+                if(stickyPathIncludeDescCheck) stickyPathIncludeDescCheck.checked = false;
+                if(stickyParamIncludeDescCheck) stickyParamIncludeDescCheck.checked = false;
+                if(stickyBodyIncludeDescCheck) stickyBodyIncludeDescCheck.checked = false;
+                if(stickyResponseIncludeDescCheck) stickyResponseIncludeDescCheck.checked = false;
 
                 // Trigger re-render and update UI state
                 handleSearchInput();
             }
 
-            clearAllButton.addEventListener("click", clearAllInputs);
+            clearAllButton?.addEventListener("click", clearAllInputs);
 
             function clearAndCheckView() {
                 const allEmpty =
-                    searchInput.value.trim() === "" &&
-                    paramSearchInput.value.trim() === "" &&
-                    bodySearchInput.value.trim() === "" &&
-                    responseSearchInput.value.trim() === "";
+                    (searchInput?.value.trim() === "") &&
+                    (paramSearchInput?.value.trim() === "") &&
+                    (bodySearchInput?.value.trim() === "") &&
+                    (responseSearchInput?.value.trim() === "");
                 if (isDetailedView && allEmpty) {
                     flashViewToggle();
                     setView(false);
@@ -3699,62 +3761,62 @@
             }
 
             function clearMainSearch() {
-                searchInput.value = "";
-                stickySearchInput.value = "";
+                if(searchInput) searchInput.value = "";
+                if(stickySearchInput) stickySearchInput.value = "";
                 handleSearchInput();
                 clearAndCheckView();
             }
 
             function clearParamSearch() {
-                paramSearchInput.value = "";
-                stickyParamSearchInput.value = "";
+                if(paramSearchInput) paramSearchInput.value = "";
+                if(stickyParamSearchInput) stickyParamSearchInput.value = "";
                 handleSearchInput();
                 clearAndCheckView();
             }
 
             function clearBodySearch() {
-                bodySearchInput.value = "";
-                stickyBodySearchInput.value = "";
+                if(bodySearchInput) bodySearchInput.value = "";
+                if(stickyBodySearchInput) stickyBodySearchInput.value = "";
                 handleSearchInput();
                 clearAndCheckView();
             }
 
             function clearResponseSearch() {
-                responseSearchInput.value = "";
-                stickyResponseSearchInput.value = "";
+                if(responseSearchInput) responseSearchInput.value = "";
+                if(stickyResponseSearchInput) stickyResponseSearchInput.value = "";
                 handleSearchInput();
                 clearAndCheckView();
             }
 
-            clearSearchInputBtn.addEventListener("click", clearMainSearch);
-            stickyClearSearchInputBtn.addEventListener(
+            clearSearchInputBtn?.addEventListener("click", clearMainSearch);
+            stickyClearSearchInputBtn?.addEventListener(
                 "click",
                 clearMainSearch
             );
-            clearParamSearchInputBtn.addEventListener(
+            clearParamSearchInputBtn?.addEventListener(
                 "click",
                 clearParamSearch
             );
-            stickyClearParamSearchInputBtn.addEventListener(
+            stickyClearParamSearchInputBtn?.addEventListener(
                 "click",
                 clearParamSearch
             );
-            clearBodySearchInputBtn.addEventListener("click", clearBodySearch);
-            stickyClearBodySearchInputBtn.addEventListener(
+            clearBodySearchInputBtn?.addEventListener("click", clearBodySearch);
+            stickyClearBodySearchInputBtn?.addEventListener(
                 "click",
                 clearBodySearch
             );
-            clearResponseSearchInputBtn.addEventListener(
+            clearResponseSearchInputBtn?.addEventListener(
                 "click",
                 clearResponseSearch
             );
-            stickyClearResponseSearchInputBtn.addEventListener(
+            stickyClearResponseSearchInputBtn?.addEventListener(
                 "click",
                 clearResponseSearch
             );
 
             window.onscroll = () => {
-                toTopButton.classList.toggle(
+                toTopButton?.classList.toggle(
                     "hidden",
                     document.body.scrollTop <= 100 &&
                         document.documentElement.scrollTop <= 100
@@ -3774,7 +3836,7 @@
                 }
             };
 
-            toTopButton.addEventListener("click", () => {
+            toTopButton?.addEventListener("click", () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
             });
 
@@ -3801,12 +3863,12 @@
             }
 
             function showError(message) {
-                errorMessage.textContent = message;
-                errorBox.classList.remove("hidden");
+                if (errorMessage) errorMessage.textContent = message;
+                errorBox?.classList.remove("hidden");
             }
 
             function hideError() {
-                errorBox.classList.add("hidden");
+                errorBox?.classList.add("hidden");
             }
         </script>
     </body>
