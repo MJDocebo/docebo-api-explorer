@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- This file was created with the assistance of an Google Gemini 3.1 Pro AI model. -->
+<!-- This file was created with the assistance of an Google Gemini 2.5 Pro AI model. -->
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -526,12 +526,41 @@
                         placeholder="e.g., mj-michael-james.docebosaas.com"
                         value="mj-michael-james.docebosaas.com"
                     />
-                    <button
-                        id="fetchButton"
-                        class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
-                    >
-                        Fetch API Endpoints
-                    </button>
+                    <div class="relative flex w-full sm:w-auto">
+                        <button
+                            id="fetchButton"
+                            class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-l-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out flex-grow sm:flex-grow-0 whitespace-nowrap"
+                        >
+                            Fetch API Endpoints
+                        </button>
+                        <button
+                            id="proxyDropdownToggle"
+                            type="button"
+                            class="bg-blue-700 text-white px-3 rounded-r-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out border-l border-blue-500 flex items-center justify-center"
+                            title="Proxy Settings"
+                        >
+                            <svg class="w-5 h-5 transition-transform duration-200" id="proxyDropdownIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="proxyDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl z-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 overflow-hidden text-left">
+                            <div class="p-3 bg-gray-50 border-b border-gray-200 dark:bg-gray-900/50 dark:border-gray-700">
+                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">CORS Proxies</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Select which proxies to test. Requests are batched to avoid rate limits.</p>
+                            </div>
+                            <ul class="p-2 space-y-1 max-h-48 overflow-y-auto" id="proxyListContainer">
+                                <!-- Populated by JS -->
+                            </ul>
+                            <div class="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
+                                <label class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                                    <input type="checkbox" id="customProxyCheckbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300 font-mono">Custom Proxy</span>
+                                </label>
+                                <div class="px-2 pb-2">
+                                    <input type="text" id="customProxyInput" placeholder="https://myproxy.com/?url=" class="w-full p-2 text-xs border border-gray-300 rounded focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 disabled:opacity-50 transition-opacity" disabled>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Appends the encoded URL to the end.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div
@@ -769,7 +798,7 @@
                                 <input
                                     id="paramIncludeDescCheck"
                                     type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
+                                    class="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
                                 />
                                 <label
                                     for="paramIncludeDescCheck"
@@ -839,7 +868,7 @@
                                 <input
                                     id="bodyIncludeDescCheck"
                                     type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
+                                    class="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500"
                                 />
                                 <label
                                     for="bodyIncludeDescCheck"
@@ -989,7 +1018,7 @@
                     class="hidden mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg dark:bg-red-900/40 dark:text-red-300 dark:border-red-500"
                     role="alert"
                 >
-                    <strong class="font-bold">Error:</strong>
+                    <strong class="font-bold">Notice:</strong>
                     <span class="block sm:inline" id="errorMessage"></span>
                 </div>
             </div>
@@ -1431,7 +1460,29 @@
             });
             // --- END OF DARK MODE SCRIPT ---
 
+            let allServiceDetails = [];
+            let originalServiceDetails = [];
+            let isDetailedView = false;
+            let activeMethodFilters = {};
+            let currentSortState = "original";
+            let workingProxyFn = null;
+
+            // Proxy Configuration
+            const availableProxies = [
+                { id: "allorigins", name: "api.allorigins.win", fn: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, checked: true },
+                { id: "codetabs", name: "api.codetabs.com", fn: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, checked: true },
+                { id: "corsproxyorg", name: "corsproxy.org", fn: (url) => `https://corsproxy.org/?${encodeURIComponent(url)}`, checked: true },
+                { id: "corsproxyio", name: "corsproxy.io", fn: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`, checked: true },
+                { id: "corslol", name: "api.cors.lol", fn: (url) => `https://api.cors.lol/?url=${encodeURIComponent(url)}`, checked: true },
+                { id: "thingproxy", name: "thingproxy.freeboard.io", fn: (url) => `https://thingproxy.freeboard.io/fetch/${url}`, checked: true }
+            ];
+
             const fetchButton = document.getElementById("fetchButton");
+            const proxyDropdownToggle = document.getElementById("proxyDropdownToggle");
+            const proxyDropdownMenu = document.getElementById("proxyDropdownMenu");
+            const proxyDropdownIcon = document.getElementById("proxyDropdownIcon");
+            const proxyListContainer = document.getElementById("proxyListContainer");
+            
             const resultsDiv = document.getElementById("results");
             const baseUrlInput = document.getElementById("baseUrlInput");
             const errorBox = document.getElementById("errorBox");
@@ -1550,11 +1601,80 @@
             const helpModal = document.getElementById("helpModal");
             const closeHelpModal = document.getElementById("closeHelpModal");
 
-            let allServiceDetails = [];
-            let originalServiceDetails = [];
-            let isDetailedView = false;
-            let activeMethodFilters = {};
-            let currentSortState = "original";
+            function renderProxyCheckboxes() {
+                if (!proxyListContainer) return;
+
+                // Load saved proxy state
+                const savedState = JSON.parse(localStorage.getItem('proxyState'));
+                if (savedState) {
+                    availableProxies.forEach((p, i) => {
+                        if(savedState[p.id] !== undefined) p.checked = savedState[p.id];
+                    });
+                }
+
+                proxyListContainer.innerHTML = availableProxies.map((proxy, index) => `
+                    <li>
+                        <label class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                            <input type="checkbox" class="proxy-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" data-index="${index}" ${proxy.checked ? 'checked' : ''}>
+                            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300 font-mono">${proxy.name}</span>
+                        </label>
+                    </li>
+                `).join('');
+
+                document.querySelectorAll('.proxy-checkbox').forEach(box => {
+                    box.addEventListener('change', (e) => {
+                        const idx = e.target.dataset.index;
+                        availableProxies[idx].checked = e.target.checked;
+                        
+                        const newState = {};
+                        availableProxies.forEach(p => newState[p.id] = p.checked);
+                        localStorage.setItem('proxyState', JSON.stringify(newState));
+                        
+                        workingProxyFn = null; // Reset working proxy when user changes settings
+                    });
+                });
+
+                // Custom Proxy Logic
+                const customProxyCheckbox = document.getElementById('customProxyCheckbox');
+                const customProxyInput = document.getElementById('customProxyInput');
+                
+                const savedCustomUrl = localStorage.getItem('customProxyUrl') || '';
+                const savedCustomEnabled = localStorage.getItem('customProxyEnabled') === 'true';
+
+                if (customProxyInput) customProxyInput.value = savedCustomUrl;
+                if (customProxyCheckbox) {
+                    customProxyCheckbox.checked = savedCustomEnabled;
+                    if(customProxyInput) customProxyInput.disabled = !savedCustomEnabled;
+
+                    customProxyCheckbox.addEventListener('change', (e) => {
+                        const isChecked = e.target.checked;
+                        if(customProxyInput) customProxyInput.disabled = !isChecked;
+                        localStorage.setItem('customProxyEnabled', isChecked);
+                        workingProxyFn = null;
+                    });
+                }
+                
+                if (customProxyInput) {
+                    customProxyInput.addEventListener('input', (e) => {
+                        localStorage.setItem('customProxyUrl', e.target.value);
+                        workingProxyFn = null;
+                    });
+                }
+            }
+
+            // Dropdown Menu Toggle Logic
+            proxyDropdownToggle?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                proxyDropdownMenu?.classList.toggle("hidden");
+                proxyDropdownIcon?.classList.toggle("rotate-180");
+            });
+
+            document.addEventListener("click", (e) => {
+                if (proxyDropdownMenu && !proxyDropdownMenu.contains(e.target) && !proxyDropdownToggle.contains(e.target)) {
+                    proxyDropdownMenu.classList.add("hidden");
+                    proxyDropdownIcon?.classList.remove("rotate-180");
+                }
+            });
 
             closeWarningBtn?.addEventListener("click", () => {
                 sessionStorage.setItem("warningClosed", "true");
@@ -1627,32 +1747,54 @@
 
                 if (navLinksContainer) navLinksContainer.innerHTML = "";
                 activeMethodFilters = {};
+                
                 if (fetchButton) {
                     fetchButton.disabled = true;
                     fetchButton.classList.add("opacity-50", "cursor-not-allowed");
                 }
+                if (proxyDropdownToggle) {
+                    proxyDropdownToggle.disabled = true;
+                    proxyDropdownToggle.classList.add("opacity-50", "cursor-not-allowed");
+                }
+                
                 updateResetButtonState();
                 hideError();
-
-                // Define proxies to cycle through
-                const proxies = [
-                    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                    (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                    (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-                ];
-                
-                let workingProxyFn = null;
 
                 // Define a helper to automatically fallback to other proxies if one fails
                 async function fetchWithProxy(targetUrl) {
                     let lastError;
                     const statusEl = document.getElementById('loading-status');
 
-                    // 1. If we found a working proxy in a previous request, try it first to save time
-                    if (workingProxyFn) {
+                    const enabledProxies = [...availableProxies.filter(p => p.checked)];
+                    
+                    // Prepend custom proxy if enabled
+                    const customProxyCheckbox = document.getElementById('customProxyCheckbox');
+                    const customProxyInput = document.getElementById('customProxyInput');
+                    if (customProxyCheckbox?.checked && customProxyInput?.value.trim()) {
+                        const customUrl = customProxyInput.value.trim();
+                        enabledProxies.unshift({
+                            id: "custom",
+                            name: "Custom Proxy",
+                            fn: (url) => customUrl.includes('{url}') 
+                                ? customUrl.replace('{url}', encodeURIComponent(url)) 
+                                : customUrl + encodeURIComponent(url)
+                        });
+                    }
+
+                    if (enabledProxies.length === 0) {
+                        throw new Error("No CORS proxies selected. Please select at least one proxy from the dropdown menu.");
+                    }
+
+                    // 1. If we found a working proxy in a previous request, try it first
+                    if (workingProxyFn && enabledProxies.some(p => p.fn === workingProxyFn)) {
                         try {
-                            const response = await fetch(workingProxyFn(targetUrl));
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s for known good proxy
+                            
+                            const response = await fetch(workingProxyFn(targetUrl), { signal: controller.signal });
+                            clearTimeout(timeoutId);
                             if (response.ok) return response;
+                            
                             // If the known proxy suddenly fails, clear it to test the others again
                             workingProxyFn = null;
                         } catch (e) {
@@ -1660,17 +1802,23 @@
                         }
                     }
 
-                    // 2. Test proxies from the list
-                    for (const proxyFn of proxies) {
+                    // 2. Test enabled proxies
+                    for (const proxy of enabledProxies) {
+                        let timeoutId;
                         try {
-                            const proxyUrl = proxyFn(targetUrl);
-                            const hostname = new URL(proxyUrl).hostname;
+                            const proxyUrl = proxy.fn(targetUrl);
+                            const hostname = proxy.name;
                             
                             if (statusEl && !workingProxyFn) {
                                 statusEl.innerHTML = `Testing proxy: <span class="text-blue-500 dark:text-blue-400 font-semibold">${hostname}</span>...`;
                             }
                             
-                            const response = await fetch(proxyUrl);
+                            const controller = new AbortController();
+                            timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout to prevent hanging
+                            
+                            const response = await fetch(proxyUrl, { signal: controller.signal });
+                            clearTimeout(timeoutId);
+                            
                             if (response.ok) {
                                 if (!workingProxyFn) { 
                                     // Only log once when a new working proxy is discovered
@@ -1679,15 +1827,20 @@
                                         statusEl.innerHTML = `Connected via <span class="text-green-500 dark:text-green-400 font-semibold">${hostname}</span>. Downloading schemas...`;
                                     }
                                 }
-                                workingProxyFn = proxyFn; // Save it for subsequent requests
+                                workingProxyFn = proxy.fn; // Save it for subsequent requests
                                 return response;
                             }
                             lastError = new Error(`HTTP Error: ${response.status}`);
                         } catch (error) {
-                            lastError = error; // Network errors caught here
+                            if (timeoutId) clearTimeout(timeoutId);
+                            if (error.name === 'AbortError') {
+                                lastError = new Error(`Timeout after 5 seconds`);
+                            } else {
+                                lastError = error; // Network errors caught here
+                            }
                         }
                     }
-                    throw new Error(`All CORS proxies failed. Last error: ${lastError.message}`);
+                    throw new Error(`All selected CORS proxies failed. Last error: ${lastError.message}`);
                 }
 
                 const targetServicesUrl = `https://${baseUrl}/manage/v1/site/microservices`;
@@ -1702,24 +1855,49 @@
                         return;
                     }
 
-                    const swaggerPromises = servicesData.data.map((service) =>
-                        fetchWithProxy(service.url)
-                            .then((res) => res.json())
-                            .then((swaggerJson) => ({ service, swaggerJson }))
-                            .catch((err) => {
-                                console.error(
-                                    `Error processing ${service.app}:`,
-                                    err
-                                );
-                                return { service, swaggerJson: null };
-                            })
-                    );
+                    const totalServices = servicesData.data.length;
+                    let completedServices = 0;
+                    allServiceDetails = [];
+                    
+                    const statusEl = document.getElementById('loading-status');
 
-                    allServiceDetails = await Promise.all(swaggerPromises);
+                    // Batch fetching to avoid rate limits (4 concurrent requests max)
+                    const concurrency = 4;
+                    for (let i = 0; i < totalServices; i += concurrency) {
+                        const batch = servicesData.data.slice(i, i + concurrency);
+                        
+                        const batchPromises = batch.map((service) =>
+                            fetchWithProxy(service.url)
+                                .then((res) => res.json())
+                                .then((swaggerJson) => {
+                                    completedServices++;
+                                    if (statusEl) statusEl.innerHTML = `Downloading schemas (${completedServices}/${totalServices})...`;
+                                    return { service, swaggerJson };
+                                })
+                                .catch((err) => {
+                                    completedServices++;
+                                    console.error(`Error processing ${service.app}:`, err);
+                                    if (statusEl) statusEl.innerHTML = `Downloading schemas (${completedServices}/${totalServices})... <span class="text-red-500">(Some failed)</span>`;
+                                    return { service, swaggerJson: null, error: err.message };
+                                })
+                        );
+                        
+                        const batchResults = await Promise.all(batchPromises);
+                        allServiceDetails.push(...batchResults);
+                    }
+
                     originalServiceDetails = [...allServiceDetails];
                     currentSortState = "original";
                     updateSortButtonsState();
                     renderServices(allServiceDetails);
+                    
+                    // Check for partial failures and notify user
+                    const failedServices = allServiceDetails.filter(d => !d.swaggerJson);
+                    if (failedServices.length > 0) {
+                        const failedNames = failedServices.map(s => s.service.app).join(', ');
+                        showError(`Failed to fetch documentation for ${failedServices.length} service(s) [${failedNames}]. Rate limits may apply. Try a different proxy.`);
+                    }
+
                 } catch (error) {
                     console.error("An error occurred:", error);
                     showError(error.message || "An unknown error occurred.");
@@ -1727,10 +1905,11 @@
                 } finally {
                     if (fetchButton) {
                         fetchButton.disabled = false;
-                        fetchButton.classList.remove(
-                            "opacity-50",
-                            "cursor-not-allowed"
-                        );
+                        fetchButton.classList.remove("opacity-50", "cursor-not-allowed");
+                    }
+                    if (proxyDropdownToggle) {
+                        proxyDropdownToggle.disabled = false;
+                        proxyDropdownToggle.classList.remove("opacity-50", "cursor-not-allowed");
                     }
                 }
             });
@@ -2234,7 +2413,7 @@
                                                     <span class="text-xs font-semibold text-gray-300">Comments: Full</span>
                                                  </button>
                                                 <button title="Copy to clipboard" class="copy-btn p-1.5 bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                                 </button>
                                             </div>
                                             <pre class="text-white text-sm p-4 max-h-[500px] overflow-auto no-wrap"><code
@@ -3541,6 +3720,8 @@
             document.addEventListener("DOMContentLoaded", () => {
                 setView(isDetailedView, true);
                 updateClearAllButtonState();
+                renderProxyCheckboxes(); // Render dropdown items
+                
                 if (toggleStickySearchBtn) {
                     toggleStickySearchBtn.addEventListener("click", () => {
                         stickySearchArea?.classList.toggle("expanded");
