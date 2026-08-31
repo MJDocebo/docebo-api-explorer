@@ -1474,6 +1474,7 @@
 
             // Proxy Configuration
             const availableProxies = [
+                { id: "cfworker", name: "My Cloudflare Worker", fn: (url) => `https://sweet-silence-a7fc.mjdocebosaas.workers.dev/?url=${encodeURIComponent(url)}`, checked: true },
                 { id: "allorigins", name: "api.allorigins.win", fn: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, checked: true },
                 { id: "codetabs", name: "api.codetabs.com", fn: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, checked: true },
                 { id: "corsproxyorg", name: "corsproxy.org", fn: (url) => `https://corsproxy.org/?${encodeURIComponent(url)}`, checked: true },
